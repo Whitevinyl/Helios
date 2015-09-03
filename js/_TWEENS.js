@@ -117,35 +117,22 @@ function positionTo(pos,to,t,d,ease) {
 
 }
 
-function worldTo(pos,to,t,d) {
+function automate(controller,axis,to,t,d) {
 
-    var tPos;
-    if (pos.ThreeObject) {
-        tPos = pos.ThreeObject.position;
-    } else {
-        tPos = pos.position;
-    }
-    var startPos = { x: tPos.x, y: tPos.y, z: tPos.z };
+    var val = controller.Slider.value[""+axis];
+    var startPos = { x: val };
 
     var tween = new TWEEN.Tween(startPos);
-    tween.to( { x: to.x, y: to.y, z: to.z }, t*1000 );
+    tween.to( { x: to }, t*1000 );
     tween.delay(d*1000);
     tween.start();
 
     tween.onUpdate(function() {
-        tPos.x = this.x;
-        tPos.y = this.y;
-        tPos.z = this.z;
-
-        if (pos.ThreeDest) {
-            pos.ThreeDest.x = this.x;
-            pos.ThreeDest.y = this.y;
-        }
-
+        controller.Slider.value[""+axis] = this.x;
+        setController(controller,false,axis);
     });
 
     tween.easing( TWEEN.Easing.Quadratic.InOut );
-    //tween.easing( TWEEN.Easing.Quintic.InOut );
 }
 
 function floatTo(obj,d) {

@@ -3,7 +3,7 @@
  */
 
 WebFontConfig = {
-    google: { families: [ 'Raleway:400:latin' ] }
+    google: { families: [ 'Raleway:400,100:latin' ] }
 };
 (function() {
     var wf = document.createElement('script');

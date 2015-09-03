@@ -35,6 +35,11 @@ function linValue(minpos,maxpos,minval,maxval,position) {
     return (position - minpos) * scale + minval;
 }
 
+function linPosition(minpos,maxpos,minval,maxval,value) {
+    var scale = (maxval - minval) / (maxpos - minpos);
+    return minpos + (value - minval) / scale;
+}
+
 function comparison(a,b,precision) {
     precision = precision || 50;
     return Math.round(a*precision) === Math.round(b*precision);
@@ -57,6 +62,14 @@ function getRadius(a,b) {
 
 function angleFromVector(a,b) {
     return Math.atan2(a,b);
+}
+
+function randomAngle() {
+    return Math.random()*(Math.PI*2)
+}
+
+function vectorFromAngle(angle) {
+    return new Vector(Math.cos(angle),Math.sin(angle));
 }
 
 function pointWithRotation(rotation,radius) {

@@ -10,6 +10,8 @@ var cxa;
 var scene = 0;
 var TWEEN;
 var loadCount = 0;
+var loadReady = false;
+var introAlpha = new Alpha();
 
 
 // METRICS //
@@ -26,8 +28,8 @@ var dataType = 0;
 var bodyType = 0;
 var subType = 0;
 var device = "desktop";
-var thisTick = 0;
 var windowFocussed = true;
+var triVector = vectorFromAngle(degToRad(30));
 
 
 // INTERACTION //
@@ -42,7 +44,6 @@ var rotateDest = new Point();
 var rotateScale = new Size();
 var rotating = false;
 var easeRotate = false;
-var controlRotation = new Point3D();
 var selectedController = null;
 var selectedControllerPos = new Point3D();
 var mouseDown3D = new Point3D();
@@ -68,14 +69,14 @@ var backgrounds = [];
 var controllers = [];
 
 var flickerParticles = [];
-var flickerPool = [];
+
+var worms = [];
+var wormClock = 0;
 
 var floatTweens = [];
 
 
 var masterRotate = new Point3D();
-var testObjects = [];
-var testMountain = 50;
 var drumLevel = 1;
 
 
@@ -113,7 +114,7 @@ function loadPalette(pal,paletteURL) {
 
 function getAllLoads() {
     loadCount += 1;
-    if (loadCount===3) {
+    if (loadCount===4) {
         loadComplete();
     }
 }
@@ -177,10 +178,14 @@ function init() {
 
     // SET CANVAS & DRAWING POSITIONS //
     metrics();
+    setupAudio();
+
+
     loadPalette("land","img/land.gif");
     loadPalette("shardLight","img/shardLight.gif");
     loadPalette("shardDark","img/shardDark.gif");
 
+    draw();
 } // END INIT
 
 
@@ -188,81 +193,72 @@ function init() {
 
 function loadComplete() {
 
-    setupAudio();
+
     setupScene();
     setup3D();
 
     createFlickerParticles();
-    //createTestObjects();
+    createWorms();
 
-    scene = 1;
+
     selectedController = controllers[0];
     BackgroundList = [];
     ControllerList = [];
 
-    draw();
+
+    loadReady = true;
+
+
+}
+
+function startScene1() {
+
+    scene = 1;
+
+    Tone.Transport.setInterval(function() {
+        if (ArpOsc.volume.value > -30) {
+
+            var octave = ArpBase + Math.round(Math.random());
+            var index = Math.floor(Math.random()*ArpScale.length);
+            ArpOsc.frequency.rampTo(ArpOsc.noteToFrequency("" + ArpScale[index] + octave),0.006);
+
+        }
+
+    },"64n");
+
+    Tone.Transport.start();
+
+    delayTo(introAlpha,"A",0,1,0);
+
+    // INTRO SEQUENCE //
 
     setTimeout( function() {
         colourTo(masterCol,-160,-120,-70,0,4);
         positionTo(controllers[0], controllers[0].Positions[1],0.1,0);
         positionTo(controllers[3], controllers[3].Positions[1],0.1,0);
-        delayTo(MasterObject.rotation,"x",0.07,10,0.5); // vert
-        delayTo(MasterObject.rotation,"y",0,6,0.5); // horiz
+        delayTo(MasterObject.rotation,"x",0.07,7,0.4); // vert
+        delayTo(MasterObject.rotation,"y",0,5,0.4); // horiz
 
     },500);
-
-
 
     setTimeout( function() {
         colourTo(masterCol,120,100,100,1,0.2); // FLASH
         bumpFunctions(0.1,true);
         easeRotate = true;
-    },8000);
+    },6800);
     setTimeout( function() {
-        colourTo(masterCol,60,-30,-100,1,2);
-        //colourTo(masterCol,33,-10,-10,1,4);
-        //paletteTo(shardCols,shardColsDark,3);
-    },8200);
+        colourTo(masterCol,60,-30,-100,1,1.6);
+    },7000);
 
     setTimeout( function() {
-        colourTo(masterCol,-40,-55,-45,1,2);
-        colourTo(highPass,50,45,0,0,2);
-        colourTo(lowPass,-255,30,50,0,2);
-        //delayTo(controlRotation,"z",0,12,0); // z spin
-    },10200);
+        colourTo(masterCol,-40,-55,-45,1,1.6);
+        colourTo(highPass,50,45,0,0,1.6);
+        colourTo(lowPass,-255,30,50,0,1.6);
+    },8600);
 
     setTimeout( function() {
         interactable = true;
-    },12000);
-
-    /*setTimeout( function() {
-        positionTo(controllers[1], controllers[1].Positions[1],4,0);
-        positionTo(controllers[3], controllers[3].Positions[1],4,0);
-        colourTo(masterCol,60,-30,-100,1,2);
-    },18000);
-
-    setTimeout( function() {
-        colourTo(masterCol,5,0,0,1,4);
-        delayTo(controlRotation,"z",2,12,0); // z spin
-    },24000);*/
-
-    /*setTimeout( function() {
-        colourTo(masterCol,0,12,20,1,4);
-        colourTo(highPass,-40,-40,-40,0,4);
-        colourTo(lowPass,100,100,100,0,4);
-    },30000);*/
-
-    /*setTimeout( function() {
-        colourTo(highPass,35,30,0,0,4);
-        colourTo(lowPass,-200,40,60,0,4);
-    },30000);*/
-
-    /*setTimeout( function() {
-        colourTo(masterCol,-40,-55,-45,1,4);
-        colourTo(highPass,50,45,0,0,3);
-        colourTo(lowPass,-255,30,50,0,3);
-        //delayTo(controlRotation,"z",0,12,0); // z spin
-    },37000);*/
+    },10200);
 
 }
 
@@ -278,10 +274,16 @@ function loadComplete() {
 
 
 function draw() {
-    if (scene==1) {
+    if (scene===0) {
+        drawIntro();
+    }
+    if (scene>0) {
         update();
         drawBG();
         drawScene();
+        if (!interactable) {
+            drawIntro();
+        }
     }
     requestAnimationFrame(draw);
 }
@@ -308,25 +310,18 @@ function update() {
     // FOR EACH CONTROLLER //
     for (var i=0; i<controllers.length; i++) {
         var controller = controllers[i];
-        /*if (controlRotation.z>0) {
-            controllers[i].ThreeObject.rotation.z += (Math.PI / 180) * controlRotation.z;
-        }*/
-
-        controller.ThreeObject.position.x += easeTo(controller.ThreeObject.position.x, controller.ThreeDest.x, 12, 100);
-        controller.ThreeObject.position.y += easeTo(controller.ThreeObject.position.y, controller.ThreeDest.y, 12, 100);
-
+        controller.ThreeObject.position.x += easeTo(controller.ThreeObject.position.x, controller.ThreeDest.x, 20, 100);
+        controller.ThreeObject.position.y += easeTo(controller.ThreeObject.position.y, controller.ThreeDest.y, 20, 100);
     }
 
     masterRotate.y += degToRad(0.5);
-    //masterRotate.x += degToRad(0.1);
 
     scaleRotate();
-    updateFlicker(new Point(halfX,halfY));
+    updateFlicker();
+    updateWorm2();
 
     var meter = DrumMeter.getLevel();
-    //var meter = DrumMeter.getDb();
     if (meter>0.01) {
-
         drumLevel = 1 + (meter*0.1);
     }
 
@@ -350,7 +345,7 @@ function scaleRotate() {
 }
 
 
-function updateFlicker(origin) {
+function updateFlicker() {
     for (var i=0; i<flickerParticles.length; i++) {
         var p = flickerParticles[i];
         if (p.Active) {
@@ -381,3 +376,103 @@ function updateFlicker(origin) {
     }
 }
 
+
+
+function updateWorm2() {
+
+    var step = 20;
+    var length = 11;
+
+    var h = 0;
+    var i, j, k;
+    if (TunePlayer2.volume.value>5) {
+        h = (TunePlayer2.volume.value - 5) / 2;
+    }
+
+    for (i=0; i<worms.length; i++) {
+        var w = worms[i];
+        if (w.Active) {
+
+            w.Position.x += w.Vector.x;
+            w.Position.y += w.Vector.y;
+
+            // POSITION PARTICLES //
+            var positions = [];
+            for (j=0; j<w.Particles.length; j++) {
+                var p = w.Particles[j];
+                p.Position.x += -1 + (Math.random()*2);
+                p.Position.y += -1 + (Math.random()*2);
+                p.Position.x = ValueInRange(p.Position.x,-45,45);
+                p.Position.y = ValueInRange(p.Position.y,-45,45);
+                if (wormClock===step) {
+                    positions.push(new Point(w.Position.x + p.Position.x, w.Position.y + p.Position.y));
+                }
+
+                // WRITE TAIL //
+                if (w.History.length>1) {
+                    var tailVector = new Vector(w.History[1][j].x - w.History[0][j].x, w.History[1][j].y - w.History[0][j].y);
+                    w.Tails[j] = new Point(w.History[0][j].x + ((tailVector.x/step)*wormClock), w.History[0][j].y + ((tailVector.y/step)*wormClock));
+                }
+
+                // WRITE SPRITE //
+                if (w.History.length===length) {
+                    var sprite = [];
+                    var chunk = 1/length;
+                    var slice = chunk/step;
+                    var m = 1;
+                    sprite.push(new Point(w.Position.x + p.Position.x, w.Position.y + p.Position.y + h) );
+                    sprite.push(new Point(w.Position.x + p.Position.x, w.Position.y + p.Position.y - h) );
+                    for (k=(length-1); k>=0; k--) {
+                        m = (chunk*k) - (slice*wormClock);
+                        sprite.push(new Point(w.History[k][j].x, w.History[k][j].y - (h*m)) );
+                    }
+                    /*sprite.push(new Point(w.Tails[j].x, w.Tails[j].y - h) );
+                    sprite.push(new Point(w.Tails[j].x, w.Tails[j].y + h) );*/
+                    sprite.push(new Point(w.Tails[j].x, w.Tails[j].y) );
+
+                    for (k=1; k<length; k++) {
+                        m = (chunk*k) - (slice*wormClock);
+                        sprite.push(new Point(w.History[k][j].x, w.History[k][j].y + (h*m)) );
+                    }
+                    w.Sprites[j] = sprite;
+                }
+
+
+            }
+
+            // WRITE POSITION SNAPSHOT //
+            if (wormClock===step) {
+                w.History.push(positions);
+                if (w.History.length>length) {
+                    w.History.shift();
+                }
+            }
+
+            var changeSpeed = 0.06;
+            var topSpeedX = 10;
+            var topSpeedY = 9;
+
+            if (w.Position.x>(50*units)) {
+                w.Vector.x -= changeSpeed * (0.5+Math.random());
+            }
+            if (w.Position.x<(-50*units)) {
+                w.Vector.x += changeSpeed * (0.5+Math.random());
+            }
+            if (w.Position.y>0) {
+                w.Vector.y -= changeSpeed * (0.5+Math.random());
+            }
+            if (w.Position.y<0) {
+                w.Vector.y += changeSpeed * (0.5+Math.random());
+            }
+
+            w.Vector.x = ValueInRange(w.Vector.x,-topSpeedX,topSpeedX);
+            w.Vector.y = ValueInRange(w.Vector.y,-topSpeedY,topSpeedY);
+        }
+    }
+
+    // CLOCK //
+    wormClock += 1;
+    if (wormClock > step) {
+        wormClock = 0;
+    }
+}

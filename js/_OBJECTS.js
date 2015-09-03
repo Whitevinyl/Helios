@@ -43,9 +43,23 @@ function RGBA( r, g, b, a ) {
     };
 }
 
+function Alpha() {
+    this.A = 100;
+}
+
 function Particle(point,vector) {
     this.Position = point || new Point();
     this.Vector = vector || new Vector();
+    this.Active = false;
+}
+
+function Worm(point,vector,particles) {
+    this.Position = point || new Point();
+    this.Vector = vector || new Vector();
+    this.Particles = particles || [];
+    this.History = [];
+    this.Tails = [];
+    this.Sprites = [];
     this.Active = false;
 }
 
@@ -85,7 +99,27 @@ function Controller( name, positions, threeObject, threeFloat, size, mode, slide
     }
     this.Event = event;
     this.Shards = shards || [];
-    this.Mod = 0;
     this.IsPressed = false;
 }
 
+function Grain( buffer, output, volume ) {
+    this.Player = new Tone.Player();
+    this.Envelope = new Tone.AmplitudeEnvelope({
+        "attack": GrainLength/2,
+        "decay": 0.01,
+        "sustain": 1.0,
+        "release": GrainLength/2
+    });
+    this.Player.connect(this.Envelope);
+    this.Envelope.connect(output);
+    this.Player.buffer = buffer;
+    this.Player.volume.value = volume;
+}
+
+function Granular (grains) {
+    this.Grains = grains;
+    this.Spread = 1;
+    this.CurrentGrain = 0;
+    this.Location = 5;
+    this.Volume = -45;
+}

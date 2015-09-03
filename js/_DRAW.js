@@ -18,6 +18,49 @@ function drawBG() {
 }
 
 
+//-------------------------------------------------------------------------------------------
+//  INTRO
+//-------------------------------------------------------------------------------------------
+
+
+function drawIntro() {
+
+    cxa.globalAlpha = introAlpha.A/100;
+
+    if (scene===0) {
+        cxa.fillStyle = "#000";
+        cxa.fillRect(0,0,fullX,fullY);
+    }
+
+
+    cxa.fillStyle = "#fff";
+    if (loadReady) {
+
+        cxa.font = "100 " + headerType + "px Raleway";
+        cxa.textAlign = "center";
+        cxa.fillText("HELIOS | YUME".toUpperCase(),halfX, halfY - (10*units));
+
+        var s = 1 + (Math.random()*0.2);
+        var ay = halfY + (30*units);
+        cxa.beginPath();
+        cxa.moveTo(halfX - ((20*s)*units),ay - ((10*s)*units));
+        cxa.lineTo(halfX + ((20*s)*units),ay - ((10*s)*units));
+        cxa.lineTo(halfX,ay + ((10*s)*units));
+        cxa.closePath();
+        cxa.fill();
+
+
+
+    } else {
+        cxa.font = "400 " + midType + "px Raleway";
+        cxa.textAlign = "center";
+        cxa.fillText("Loading Sounds".toUpperCase(),halfX, halfY - (4*units));
+        cxa.fillRect(halfX - (6*units), halfY + (4*units), 12*units, 2*units );
+    }
+}
+
+
+
 
 
 
@@ -33,6 +76,7 @@ function drawScene() {
     var pos;
 
 
+    // BACKGROUNDS //
     for (i=(backgrounds.length-1); i>-1; i--) {
         var background = backgrounds[i];
         pos = get2Dfrom3D(background, camera3D);
@@ -41,6 +85,17 @@ function drawScene() {
         drawBackground(background,pos);
     }
 
+    // TRIANGLE //
+    drawTriangle();
+
+    // WORMS //
+    for (i=0; i< worms.length; i++) {
+        drawWorm2(worms[i]);
+    }
+
+    drawExtra();
+
+    // CONTROLLERS / SHARDS //
     for (i=0; i< controllers.length; i++) {
         var controller = controllers[i];
         cxa.globalAlpha = 1;
@@ -57,6 +112,7 @@ function drawScene() {
         drawArrows(controller);
     }
 
+    // HUD //
     cxa.globalAlpha = 1;
     setColor(shardCols[4]);
     //cxa.fillStyle = shardCols[4].toString();
@@ -65,17 +121,12 @@ function drawScene() {
     cxa.fillText("Helios | Yume".toUpperCase(),halfX, fullY - (30*units));
     cxa.fillRect(halfX - (6*units), fullY - (21*units), 12*units, 2*units );
 
-    //cxa.fillRect(testPoint.x - (40*units), testPoint.y - (20*units), 80*units, 40*units );
-
-
-    /*for (i=0; i< testObjects.length; i++) {
-        var point = point2Dfrom3D(testObjects[i]);
-        cxa.fillRect( halfX + (point.x) - (2*units), halfY + (point.y) - (2*units), 4*units, 4*units );
-    }*/
-
+    // FLICKERS //
     for (i=0; i< flickerParticles.length; i++) {
         drawFlickers(flickerParticles[i]);
     }
+
+
 
 }
 
@@ -317,6 +368,154 @@ function drawFlickers(p) {
 
 }
 
+function drawWorm(p) {
+
+    //var origin = get2Dfrom3D(World3D,camera3D);
+
+    var h = 0;
+    var j, i;
+    if (AmbientPlayer.volume.value>5) {
+        h = (AmbientPlayer.volume.value-5) / 2;
+
+        setColor(shardCols[4]);
+        cxa.globalAlpha = 1;
+
+        for (i=0; i< p.Particles.length; i++) {
+
+
+            var point = p.History[p.History.length-1][i];
+            var x = halfX + (point.x*units);
+            var y = halfY + (point.y*units);
+
+            var pointList = [];
+            var step = 10;
+            var length = 100;
+
+            if (p.History.length===length) {
+
+
+                for (j=(p.History.length-1); j>=0; j-=step) {
+                    point = p.History[j][i];
+
+                    x = halfX + (point.x*units);
+                    y = halfY + (point.y*units);
+                    var slot = (length/step) - ((j+1)/step);
+                    var total = (((length/step)*2) - 1);
+                    var hmod = 1 - ((1/(length/step))*slot);
+                    pointList[slot] = new Point( x, y - ((h*hmod)*units) );
+                    pointList[total - slot] = new Point( x, y + ((h*hmod)*units) );
+                }
+
+                cxa.beginPath();
+                cxa.moveTo(pointList[0].x,pointList[0].y);
+                for (j=1; j<pointList.length; j++) {
+                    cxa.lineTo(pointList[j].x,pointList[j].y);
+                }
+                cxa.closePath();
+                cxa.fill();
+            }
+
+        }
+    }
+}
+
+function drawWorm2(w) {
+    var j, k;
+    if (TunePlayer2.volume.value>5) {
+        setColor(shardCols[4]);
+        cxa.globalAlpha = 1;
+        if (w.Sprites.length) {
+            for (j=0; j< w.Sprites.length; j++) {
+
+                var s = w.Sprites[j];
+                cxa.beginPath();
+                cxa.moveTo(halfX + (s[0].x*units), halfY + (s[0].y*units));
+                for (k=1; k< s.length; k++) {
+                    cxa.lineTo(halfX + (s[k].x*units), halfY + (s[k].y*units));
+                }
+                cxa.closePath();
+                cxa.fill();
+            }
+        }
+    }
+}
+
+function drawTriangle() {
+    if (ArpOsc.volume.value>-20) {
+
+        setColor(shardCols[5]);
+        cxa.globalAlpha = 1;
+
+        var v = triVector;
+        var r = (160 + (Math.random()*10))*units;
+        var x = halfX;
+        var y = halfY + (20*units);
+        var w = ((ArpOsc.volume.value + 20) * (2.5 + (Math.random()*1.5))) * units;
+
+        /*// OUTSIDE //
+        cxa.beginPath();
+        cxa.moveTo(x, y + r);
+        cxa.lineTo(x - (r * v.x), y - (r * v.y));
+        cxa.lineTo(x + (r * v.x), y - (r * v.y));
+        cxa.lineTo(x, y + r);
+
+        // INSIDE //
+        cxa.lineTo(x, y + (r - w));
+        cxa.lineTo(x + ((r - w) * v.x), y - ((r - w) * v.y));
+        cxa.lineTo(x - ((r - w) * v.x), y - ((r - w) * v.y));
+        cxa.lineTo(x, y + (r - w));*/
+
+        // OUTSIDE //
+        cxa.beginPath();
+        cxa.moveTo(x - (r * v.x), y + (r * v.y));
+        cxa.lineTo(x, y - r);
+        cxa.lineTo(x + (r * v.x), y + (r * v.y));
+
+
+        // INSIDE //
+        cxa.lineTo(x + ((r - w) * v.x), y + ((r - w) * v.y));
+        cxa.lineTo(x, y - (r - w));
+        cxa.lineTo(x - ((r - w) * v.x), y + ((r - w) * v.y));
+
+
+        cxa.closePath();
+        cxa.fill();
+
+
+        /*setColor(shardCols[4]);
+        w *= 0.2;
+        var rv;
+        for (var i=0; i<5; i++) {
+            cxa.beginPath();
+            rv = vectorFromAngle(randomAngle());
+            cxa.moveTo(x + (w * rv.x), y + (w * rv.y));
+            rv = vectorFromAngle(randomAngle());
+            cxa.lineTo(x + (w * rv.x), y + (w * rv.y));
+            rv = vectorFromAngle(randomAngle());
+            cxa.lineTo(x + (w * rv.x), y + (w * rv.y));
+            cxa.closePath();
+            cxa.fill();
+        }*/
+
+
+
+
+    }
+}
+
+function drawExtra() {
+
+    setColor(shardCols[6]);
+    cxa.lineWidth = 2* units;
+    var ps1 = get2Dfrom3D(controllers[7],camera3D);
+    var ps2 = get2Dfrom3D(controllers[6],camera3D);
+
+    cxa.beginPath();
+    cxa.moveTo(ps1.x, ps1.y);
+    cxa.bezierCurveTo(ps1.x, ps1.y+(240*units), ps2.x, ps1.y+(240*units), ps2.x, ps2.y);
+    cxa.stroke();
+    cxa.lineWidth = 1;
+}
 
 
 // PASS COLOUR OBJECT //

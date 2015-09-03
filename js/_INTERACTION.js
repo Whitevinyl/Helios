@@ -11,34 +11,39 @@
 
 function mousePress() {
 
-    mouseIsDown = true;
-    rolloverCheck();
-
-    downPoint.x = mouseX;
-    downPoint.y = mouseY;
-    downRotation.x = MasterObject.rotation.y;
-    downRotation.y = MasterObject.rotation.x;
-
-    // FOR EACH CONTROLLER //
-    for (var i=0; i<controllers.length; i++) {
-        var controller = controllers[i];
-
-        if (controller.RollOver) {
-
-            if (controller.Event) {
-                controller.Event();
-            } else {
-                controller.IsPressed = true;
-                selectedController = controller;
-                selectedControllerPos = clone3D(controller.ThreeObject.position);
-                mouseDown3D = cursorTo3D(mouseX,mouseY,controller,camera3D);
-            }
-
-            return;
-        }
+    if (scene===0 && loadReady) {
+        startScene1();
     }
 
+    if (interactable) {
 
+        mouseIsDown = true;
+        rolloverCheck();
+
+        downPoint.x = mouseX;
+        downPoint.y = mouseY;
+        downRotation.x = MasterObject.rotation.y;
+        downRotation.y = MasterObject.rotation.x;
+
+        // FOR EACH CONTROLLER //
+        for (var i=0; i<controllers.length; i++) {
+            var controller = controllers[i];
+
+            if (controller.RollOver) {
+
+                if (controller.Event) {
+                    controller.Event();
+                } else {
+                    controller.IsPressed = true;
+                    selectedController = controller;
+                    selectedControllerPos = clone3D(controller.ThreeObject.position);
+                    mouseDown3D = cursorTo3D(mouseX,mouseY,controller,camera3D);
+                }
+
+                return;
+            }
+        }
+    }
 }
 
 function mouseRelease() {
@@ -75,20 +80,24 @@ function mouseMove(event) {
     //drag3D();
     rolloverCheck();
 
-
-    if (selectedController.IsPressed && interactable) {
-        dragController(selectedController,true);
+    if (selectedController) {
+        if (selectedController.IsPressed && interactable) {
+            dragController(selectedController,true);
+        }
     }
+
 }
 
 function rolloverCheck() {
 
-
-    for (var i=0; i<controllers.length; i++) {
-        var controller = controllers[i];
-        var pos = get2Dfrom3D(controller, camera3D);
-        controller.RollOver = hitBox(pos.x - ((controller.Size.w*0.5)*units), pos.y - ((controller.Size.h*0.5)*units), controller.Size.w*units, controller.Size.h*units);
+    if (scene>0) {
+        for (var i=0; i<controllers.length; i++) {
+            var controller = controllers[i];
+            var pos = get2Dfrom3D(controller, camera3D);
+            controller.RollOver = hitBox(pos.x - ((controller.Size.w*0.5)*units), pos.y - ((controller.Size.h*0.5)*units), controller.Size.w*units, controller.Size.h*units);
+        }
     }
+
 
 
 }
@@ -173,7 +182,6 @@ function dragController(controller,toCursor) {
         if (enableX) {
             objPos.x = newPos.x;
             objPos.x = ValueInRange(objPos.x,originX,originX + slider.range.x);
-            //slider.value.x = linValue(originX,originX + slider.range.x,slider.minVal.x,slider.maxVal.x,objPos.x);
             slider.value.x = getValue(controller,"x");
             if (slider.functions) {
                 slider.functions[0](slider.value.x,t,true);
@@ -182,16 +190,39 @@ function dragController(controller,toCursor) {
         if (enableY) {
             objPos.y = newPos.y;
             objPos.y = ValueInRange(objPos.y,originY,originY + slider.range.y);
-            //slider.value.y = linValue(originY,originY + slider.range.y,slider.minVal.y,slider.maxVal.y,objPos.y);
             slider.value.y = getValue(controller,"y");
             if (slider.functions) {
                 slider.functions[1](slider.value.y,t,true);
             }
         }
     }
+}
 
+function setController(controller,visuals,axis) {
+
+    var objPos = controller.ThreeDest;
+    var slider = controller.Slider;
+
+    var enableX = slider.range.x!==0;
+    var enableY = slider.range.y!==0;
+    var t = 0.1;
+
+
+    if (enableX && axis==="x") {
+        objPos.x = getPosition(controller,"x");
+        if (slider.functions) {
+            slider.functions[0](slider.value.x,t,visuals);
+        }
+    }
+    if (enableY && axis==="y") {
+        objPos.y = getPosition(controller,"y");
+        if (slider.functions) {
+            slider.functions[1](slider.value.y,t,visuals);
+        }
+    }
 
 }
+
 
 function getValue(controller,axis) {
     var objPos = controller.ThreeDest;
@@ -200,3 +231,9 @@ function getValue(controller,axis) {
     return linValue(origin,origin + slider.range[""+axis],slider.minVal[""+axis],slider.maxVal[""+axis],objPos[""+axis]);
 }
 
+function getPosition(controller,axis) {
+    var value = controller.Slider.value[""+axis];
+    var slider = controller.Slider;
+    var origin = slider.origin[""+axis];
+    return linPosition(origin,origin + slider.range[""+axis],slider.minVal[""+axis],slider.maxVal[""+axis],value);
+}
