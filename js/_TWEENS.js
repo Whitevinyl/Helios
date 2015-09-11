@@ -117,8 +117,9 @@ function positionTo(pos,to,t,d,ease) {
 
 }
 
-function automate(controller,axis,to,t,d) {
+function automate(controller,axis,to,t,d,g) {
 
+    g = g || false;
     var val = controller.Slider.value[""+axis];
     var startPos = { x: val };
 
@@ -129,7 +130,7 @@ function automate(controller,axis,to,t,d) {
 
     tween.onUpdate(function() {
         controller.Slider.value[""+axis] = this.x;
-        setController(controller,false,axis);
+        setController(controller,g,axis);
     });
 
     tween.easing( TWEEN.Easing.Quadratic.InOut );

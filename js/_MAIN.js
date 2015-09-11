@@ -11,7 +11,7 @@ var scene = 0;
 var TWEEN;
 var loadCount = 0;
 var loadReady = false;
-var introAlpha = new Alpha();
+var introAlpha = new Alpha(100);
 
 
 // METRICS //
@@ -65,20 +65,30 @@ var lowPass = new RGBA(0,0,0,0);
 // SCENE OBJECTS //
 var BackgroundList = [];
 var ControllerList = [];
+var SceneryList = [];
 var backgrounds = [];
 var controllers = [];
+var scenery = [];
 
 var flickerParticles = [];
+var flickerParticles2 = [];
+var windParticles = [];
+var dustParticles = [];
+var radialParticles = [];
+var passageParticles = [];
+
+var windDir = 0;
 
 var worms = [];
 var wormClock = 0;
 
 var floatTweens = [];
-
+var sunDest = 110;
 
 var masterRotate = new Point3D();
 var drumLevel = 1;
 
+var passageAlpha = new Alpha(0);
 
 //-------------------------------------------------------------------------------------------
 //  INITIALISE
@@ -144,14 +154,15 @@ function init() {
     ////////////// SETUP CANVAS ////////////
 
     canvas = document.getElementById("cnvs");
+    var target = canvas;
 
     // MOUSE //
-    canvas.addEventListener("mousedown", mousePress, false);
-    canvas.addEventListener("mouseup", mouseRelease, false);
-    canvas.addEventListener("mousemove", mouseMove, false);
+    target.addEventListener("mousedown", mousePress, false);
+    target.addEventListener("mouseup", mouseRelease, false);
+    target.addEventListener("mousemove", mouseMove, false);
 
     // TOUCH //
-    canvas.addEventListener('touchstart', function(event) {
+    target.addEventListener('touchstart', function(event) {
         if (event.targetTouches.length == 1) {
             touch = event.targetTouches[0];
             touchTakeover = true;
@@ -160,14 +171,14 @@ function init() {
         }
         clickOrTouch();
     }, false);
-    canvas.addEventListener('touchmove', function(event) {
+    target.addEventListener('touchmove', function(event) {
         event.preventDefault();
         if (event.targetTouches.length == 1) {
             touch = event.targetTouches[0];
         }
         mouseMove(event);
     }, false);
-    canvas.addEventListener('touchend', function(event) {
+    target.addEventListener('touchend', function(event) {
         mouseRelease();
         touchTakeover = false;
     }, false);
@@ -198,13 +209,17 @@ function loadComplete() {
     setup3D();
 
     createFlickerParticles();
+    createFlickerParticles2();
     createWorms();
-
+    createWind();
+    createDust();
+    createRadials();
+    createPassage();
 
     selectedController = controllers[0];
     BackgroundList = [];
     ControllerList = [];
-
+    SceneryList = [];
 
     loadReady = true;
 
@@ -314,11 +329,18 @@ function update() {
         controller.ThreeObject.position.y += easeTo(controller.ThreeObject.position.y, controller.ThreeDest.y, 20, 100);
     }
 
+    scenery[3].ThreeObject.position.y += easeTo(scenery[3].ThreeObject.position.y, sunDest, 20, 100);
+
     masterRotate.y += degToRad(0.5);
 
     scaleRotate();
     updateFlicker();
+    updateFlicker2();
     updateWorm2();
+    updateWind();
+    updateDust();
+    updateRadial();
+    updatePassage();
 
     var meter = DrumMeter.getLevel();
     if (meter>0.01) {
@@ -376,7 +398,157 @@ function updateFlicker() {
     }
 }
 
+function updateFlicker2() {
+    for (var i=0; i<flickerParticles2.length; i++) {
+        var p = flickerParticles2[i];
+        if (p.Active) {
 
+            p.Position.y -= p.Vector.y;
+            var y = p.Position.y * units;
+
+            if (y < -fullY) {
+                p.Position.y = (fullY/units);
+                p.Position.x = -100 + (Math.random()*200);
+            }
+
+        }
+    }
+}
+
+function updateRadial() {
+    for (var i=0; i<radialParticles.length; i++) {
+        var p = radialParticles[i];
+        if (p.Active) {
+
+            p.Angle += p.Speed;
+            if (p.Angle>360) {
+                p.Angle -= 360;
+            }
+            p.Vector = vectorFromAngle(degToRad(p.Angle));
+            p.Position = pointWithRotation(degToRad(p.Angle), p.Rad);
+        }
+    }
+}
+
+function updatePassage() {
+    if (passageAlpha.A>0 && Player[9].volume.value >= -21) {
+
+        for (var i=0; i<passageParticles.length; i++) {
+            var p = passageParticles[i];
+
+            p.Position.y += (1 + ((Player[9].volume.value + 20) * 0.3) ) * p.Z;
+
+            if (p.Position.y > (fullY/units)) {
+                p.Position.y = - (fullY/units);
+                p.Position.x = (-halfX + (Math.random()*fullX) )/units;
+            }
+        }
+
+    }
+
+}
+
+function updateWind() {
+    var i,k;
+
+    var peak = 2;
+    for (i=0; i<windParticles.length; i++) {
+        var p = windParticles[i];
+
+        // RESET //
+        if ((p.Focus > p.Particles.length)) {
+
+            resetWind(p);
+
+        }
+
+        // UPDATE //
+        var speed = 0.15;
+        p.Amp[p.Focus] += speed;
+        if (p.Focus > 0) {
+            if (p.Amp[p.Focus - 1] > 0) {
+                p.Amp[p.Focus - 1] -= speed;
+            }
+        }
+        if (p.Amp[p.Focus] >= 1) {
+            p.Focus += 1;
+        }
+
+        var sprite = [];
+        var wp = p.Particles[0];
+        var h = p.Amp[0] * peak;
+
+        sprite.push(new Point(wp.Position.x, wp.Position.y) );
+        sprite.push(new Point(wp.Position.x, wp.Position.y) );
+
+        for (k=1; k<p.Particles.length; k++) {
+            wp = p.Particles[k];
+            h = p.Amp[k] * peak;
+            if (k===(p.Particles.length-1)) {
+                h = 0;
+            }
+            sprite.push(new Point(wp.Position.x, wp.Position.y - h) );
+        }
+
+        for (k=(p.Particles.length-1); k>0; k--) {
+            wp = p.Particles[k];
+            h = p.Amp[k] * peak;
+            if (k===(p.Particles.length-1)) {
+                h = 0;
+            }
+            sprite.push(new Point(wp.Position.x, wp.Position.y + h) );
+        }
+
+        p.Sprite = sprite;
+
+
+    }
+}
+
+function resetWind(p) {
+    p.Focus = 0;
+    p.Particles[0].Vector.x = - (70 + (Math.random()*30));
+    p.Particles[0].Vector.y = Math.random()*20;
+    p.Particles[0].Position = new Point();
+    p.Position = randomPoint(100,50);
+    p.Amp[p.Amp.length-1] = 0;
+
+    for (var j=1; j< p.Particles.length; j++) {
+        p.Particles[j].Vector.x = p.Particles[j-1].Vector.x;
+        p.Particles[j].Vector.y = p.Particles[j-1].Vector.y - windDir - (Math.random()*10);
+
+        p.Particles[j].Position.x = p.Particles[j-1].Position.x + p.Particles[j].Vector.x;
+        p.Particles[j].Position.y = p.Particles[j-1].Position.y + p.Particles[j].Vector.y;
+    }
+}
+
+function updateDust() {
+    var i;
+    for (i=0; i<dustParticles.length; i++) {
+        var p = dustParticles[i];
+
+        p.Position.x += p.Vector.x;
+        p.Position.y += p.Vector.y;
+
+        //p.Position.y = ValueInRange(p.Position.y,-150,150);
+
+        p.Vector.x = fluctuate(p.Vector.x,0.5);
+        p.Vector.y = fluctuate(p.Vector.y,0.5);
+        p.Vector.x = ValueInRange(p.Vector.x,-3,-10);
+        p.Vector.y = ValueInRange(p.Vector.y,-3,3);
+
+        if (p.Position.y < -150) {
+            p.Vector.y = 0.5;
+        }
+        if (p.Position.y > 150) {
+            p.Vector.y = -0.5;
+        }
+
+        if (p.Position.x < -halfX) {
+            p.Position.x = fullX;
+        }
+    }
+}
 
 function updateWorm2() {
 
@@ -385,8 +557,8 @@ function updateWorm2() {
 
     var h = 0;
     var i, j, k;
-    if (TunePlayer2.volume.value>5) {
-        h = (TunePlayer2.volume.value - 5) / 2;
+    if (Player[3].volume.value>5) {
+        h = (Player[3].volume.value - 5) / 2;
     }
 
     for (i=0; i<worms.length; i++) {

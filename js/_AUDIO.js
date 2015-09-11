@@ -2,23 +2,19 @@
  * Created by luketwyman on 20/08/2015.
  */
 
-var Master;
-var DroneOsc, DroneFilter, DroneNoise, DroneLFO, DronePWMO, AmbientPlayer, DrumPlayer, TunePlayer, TunePlayer2,
-    DrumMeter, ArpOsc, ArpFilter,  SlideOsc1, SlideOsc2, SlideOsc3, SlideFilter, SliderNoise, SlideLFO;
+var DrumMeter, ArpOsc, ArpFilter, SlideFilter,  SlideLFO;
 var Reverb, Delay;
 var Osc = [], LFO = [], Player = [], Gran = [], Noise = [], Filter = [];
-var GranBuffer = [];
 var ArpBase = 5;
 var ArpScale = ["a","b","c#","d","e","f#"];
 var slideOctave = 4;
 var slideScale = ["a"+(slideOctave-1),"f#"+(slideOctave-1),"d"+slideOctave,"c#"+slideOctave,"d"+(slideOctave),"a"+slideOctave,"c#"+slideOctave,"d"+slideOctave,"f#"+slideOctave,"g"+slideOctave];
 var slideScale2 = ["d"+(slideOctave-2),"d"+(slideOctave-2),"f#"+(slideOctave-2),"f#"+(slideOctave-2),"b"+(slideOctave-3),"b"+(slideOctave-3),"a"+(slideOctave-2),"a"+(slideOctave-2),"g"+(slideOctave-2),"g"+(slideOctave-2)];
-
+var synthGain = new Point(1.1,0);
 
 var slideCurrent = 3;
 var loadedLoops = 0;
-var GrainLength = 0.145;
-var GrainNo = 3;
+var loadTotal = 0;
 
 Tone.Transport.bpm.value = 80;
 
@@ -26,50 +22,97 @@ function setupAudio() {
     Tone.Master.volume.value = -15;
 
 
-    AmbientPlayer = new Tone.Player();
-    AmbientPlayer.load("loops/trimmed/ambient01.mp3",function(player) {
+    Player[0] = new Tone.Player();
+    Player[0].load("loops/trimmed/ambient01.mp3",function(player) {
         player.loopEnd = 3;
         player.loop = true;
         loopsLoaded();
     });
-    AmbientPlayer.volume.value = -50;
+    loadTotal += 1;
+    Player[0].volume.value = -50;
 
-    DrumPlayer = new Tone.Player();
-    DrumPlayer.load("loops/trimmed/drums01.mp3",function(player) {
+    Player[1] = new Tone.Player();
+    Player[1].load("loops/trimmed/drums01.mp3",function(player) {
         player.loopEnd = 3;
         player.loop = true;
         loopsLoaded();
     });
-    DrumPlayer.volume.value = -50;
+    loadTotal += 1;
+    Player[1].volume.value = -50;
 
     DrumMeter = new Tone.Meter();
 
-    TunePlayer = new Tone.Player();
-    TunePlayer.load("loops/trimmed/tune01.mp3",function(player) {
+    Player[2] = new Tone.Player();
+    Player[2].load("loops/trimmed/tune01.mp3",function(player) {
         player.loopEnd = 9;
         player.loop = true;
         loopsLoaded();
     });
-    TunePlayer.volume.value = -50;
+    loadTotal += 1;
+    Player[2].volume.value = -50;
 
-    TunePlayer2 = new Tone.Player();
-    TunePlayer2.load("loops/trimmed/tune02.mp3",function(player) {
+    Player[3] = new Tone.Player();
+    Player[3].load("loops/trimmed/tune02.mp3",function(player) {
         player.loopEnd = 12;
         player.loop = true;
         loopsLoaded();
     });
-    TunePlayer2.volume.value = -50;
+    loadTotal += 1;
+    Player[3].volume.value = -50;
 
-
-
-    /*GranBuffer[0] = new Tone.Buffer("loops/trimmed/gran03.mp3",function(buffer) {
-        var grains = [];
-        for (var i=0; i<GrainNo; i++) {
-            grains.push(new Grain(buffer,Reverb,-45));
-        }
-        Gran[0] = new Granular(grains);
+    Player[4] = new Tone.Player();
+    Player[4].load("loops/trimmed/pagoda01.mp3",function(player) {
+        player.loopEnd = 19.5;
+        player.loop = true;
         loopsLoaded();
-    });*/
+    });
+    loadTotal += 1;
+    Player[4].volume.value = -50;
+
+    Player[5] = new Tone.Player();
+    Player[5].load("loops/trimmed/pagodaDrums01.mp3",function(player) {
+        player.loopEnd = 3;
+        player.loop = true;
+        loopsLoaded();
+    });
+    loadTotal += 1;
+    Player[5].volume.value = -50;
+
+    Player[6] = new Tone.Player();
+    Player[6].load("loops/trimmed/sun01.mp3",function(player) {
+        player.loopEnd = 12;
+        player.loop = true;
+        loopsLoaded();
+    });
+    loadTotal += 1;
+    Player[6].volume.value = -50;
+
+    Player[7] = new Tone.Player();
+    Player[7].load("loops/trimmed/sun02.mp3",function(player) {
+        player.loopEnd = 6;
+        player.loop = true;
+        loopsLoaded();
+    });
+    loadTotal += 1;
+    Player[7].volume.value = -50;
+
+    Player[8] = new Tone.Player();
+    Player[8].load("loops/trimmed/passage01c.mp3",function(player) {
+        player.loopEnd = 12;
+        player.loop = true;
+        loopsLoaded();
+    });
+    loadTotal += 1;
+    Player[8].volume.value = -50;
+
+    Player[9] = new Tone.Player();
+    Player[9].load("loops/trimmed/passageDrums01.mp3",function(player) {
+        player.loopEnd = 3;
+        player.loop = true;
+        loopsLoaded();
+    });
+    loadTotal += 1;
+    Player[9].volume.value = -50;
 
     Reverb = new Tone.JCReverb(0.9);
     Reverb.wet.value = 0;
@@ -109,13 +152,19 @@ function setupAudio() {
     SlideFilter = new Tone.Filter(5000);
     SlideLFO = new Tone.LFO(3,-300,300);
 
-    DrumPlayer.connect(DrumMeter.input);
+    Player[1].connect(DrumMeter.input);
     LFO[0].connect(Osc[0].detune);
 
-    AmbientPlayer.connect(Filter[0]);
-    TunePlayer.connect(Filter[0]);
-    DrumPlayer.connect(Filter[0]);
-    TunePlayer2.connect(Filter[0]);
+    Player[0].connect(Filter[0]);
+    Player[1].connect(Filter[0]);
+    Player[2].connect(Filter[0]);
+    Player[3].connect(Filter[0]);
+    Player[4].connect(Filter[0]);
+    Player[5].connect(Filter[0]);
+    Player[6].connect(Filter[0]);
+    Player[7].connect(Filter[0]);
+    Player[8].connect(Filter[0]);
+    Player[9].connect(Filter[0]);
 
     Osc[0].connect(Filter[0]);
     Osc[1].connect(Filter[0]);
@@ -132,10 +181,16 @@ function setupAudio() {
     Reverb.toMaster();
     Delay.toMaster();
 
-    AmbientPlayer.sync();
-    DrumPlayer.sync();
-    TunePlayer.sync();
-    TunePlayer2.sync();
+    Player[0].sync();
+    Player[1].sync();
+    Player[2].sync();
+    Player[3].sync();
+    Player[4].sync();
+    Player[5].sync();
+    //Player[6].sync();
+    //Player[7].sync();
+    //Player[8].sync();
+    //Player[9].sync();
 
     Osc[0].sync();
     Osc[1].sync();
@@ -169,6 +224,7 @@ function SynthSet(n) {
             });
             LFO[0].connect(Filter[1].frequency);
             break;
+
     }
 }
 
@@ -176,7 +232,7 @@ function SynthSet(n) {
 function loopsLoaded() {
     loadedLoops += 1;
 
-    if (loadedLoops==4) {
+    if (loadedLoops==10) {
         getAllLoads();
     }
 }

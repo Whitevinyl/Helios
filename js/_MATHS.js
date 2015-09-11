@@ -45,10 +45,17 @@ function comparison(a,b,precision) {
     return Math.round(a*precision) === Math.round(b*precision);
 }
 
+function clone2D(point2d) {
+    return new Point(point2d.x,point2d.y);
+}
+
 function clone3D(point3d) {
     return new Point3D(point3d.x,point3d.y,point3d.x);
 }
 
+function near(v,dest,range) {
+    return (v >= (dest - range)) && (v <= (dest + range));
+}
 
 // pseudo 3d //
 
@@ -106,4 +113,14 @@ function perspectiveOffset(x,y,z) {
 function normaliseVector(v) {
     var m = Math.sqrt((v.x * v.x) + (v.y * v.y));
     return new Point(v.x / m, v.y / m);
+}
+
+function randomPoint(xr,yr) {
+    xr = xr || halfX;
+    yr = yr || halfY;
+    return new Point(-xr + (Math.random()*(xr*2)),-yr + (Math.random()*(yr*2)));
+}
+
+function fluctuate(v,a) {
+    return v += -a + (Math.random()*(a*2));
 }

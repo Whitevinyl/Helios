@@ -43,8 +43,8 @@ function RGBA( r, g, b, a ) {
     };
 }
 
-function Alpha() {
-    this.A = 100;
+function Alpha(a) {
+    this.A = a;
 }
 
 function Particle(point,vector) {
@@ -72,6 +72,13 @@ function Background( threeObject, positions, sprite, color ) {
     this.Positions = positions || [new Point()];
     this.Sprite = sprite || new Sprite();
     this.Color = color || new RGBA(Math.round(Math.random()*255),Math.round(Math.random()*255),Math.round(Math.random()*255),1);
+}
+
+function Scenery(name, threeObject, positions, xscale) {
+    this.Name = name || "No Name";
+    this.ThreeObject = threeObject || MasterObject;
+    this.Positions = positions || [new Point()];
+    this.XScale = xscale || false;
 }
 
 function Shard( threeObject, size, sprite, color, xscale, vine ) {
@@ -122,4 +129,28 @@ function Granular (grains) {
     this.CurrentGrain = 0;
     this.Location = 5;
     this.Volume = -45;
+}
+
+function Wind (particles,amp) {
+    this.Particles = particles;
+    this.Amp = amp;
+    this.Focus = 0;
+    this.Sprite = [];
+    this.Position = randomPoint();
+}
+
+function Radial() {
+    this.Position = new Point();
+    this.Vector = new Vector();
+    this.Rad = 200 + (Math.random()*70);
+    this.Angle = Math.random() * 360;
+    this.Active = false;
+    this.Speed = 5 + (Math.random()*3);
+}
+
+function Passage(point,vector,z) {
+    this.Position = point || new Point();
+    this.Vector = vector || new Vector();
+    this.Active = false;
+    this.Z = z;
 }

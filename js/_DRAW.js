@@ -34,6 +34,7 @@ function drawIntro() {
 
 
     cxa.fillStyle = "#fff";
+    cxa.strokeStyle = "#fff";
     if (loadReady) {
 
         cxa.font = "100 " + headerType + "px Raleway";
@@ -56,6 +57,17 @@ function drawIntro() {
         cxa.textAlign = "center";
         cxa.fillText("Loading Sounds".toUpperCase(),halfX, halfY - (4*units));
         cxa.fillRect(halfX - (6*units), halfY + (4*units), 12*units, 2*units );
+
+        cxa.beginPath();
+        cxa.moveTo(halfX - (60*units),halfY + (20*units));
+        cxa.lineTo(halfX + (60*units),halfY + (20*units));
+        cxa.lineTo(halfX + (60*units),halfY + (32*units));
+        cxa.lineTo(halfX - (60*units),halfY + (32*units));
+        cxa.closePath();
+        cxa.stroke();
+
+        cxa.fillRect(halfX - (60*units), halfY + (20*units), ((120/loadTotal)*loadedLoops)*units, 12*units );
+
     }
 }
 
@@ -75,23 +87,53 @@ function drawScene() {
     var i;
     var pos;
 
+    drawSun();
 
     // BACKGROUNDS //
-    for (i=(backgrounds.length-1); i>-1; i--) {
-        var background = backgrounds[i];
-        pos = get2Dfrom3D(background, camera3D);
-        setColor(background.Color);
-        //cxa.fillStyle = background.Color.toString();
-        drawBackground(background,pos);
+    if (near(scene,1,3)) {
+        for (i=(backgrounds.length-1); i>-1; i--) {
+            var background = backgrounds[i];
+            pos = get2Dfrom3D(background, camera3D);
+            setColor(background.Color);
+            //cxa.fillStyle = background.Color.toString();
+            drawBackground(background,pos);
+        }
     }
+
 
     // TRIANGLE //
-    drawTriangle();
+    //if (near(scene,2,1)) {
 
-    // WORMS //
-    for (i=0; i< worms.length; i++) {
-        drawWorm2(worms[i]);
+        drawTriangle();
+
+        // WORMS //
+        for (i=0; i< worms.length; i++) {
+            drawWorm2(worms[i]);
+        }
+    //}
+
+    drawPagoda();
+
+    // WIND //
+    for (i=0; i< windParticles.length; i++) {
+        drawWind(windParticles[i]);
     }
+    // WIND //
+    for (i=0; i< dustParticles.length; i++) {
+        drawDust(dustParticles[i]);
+    }
+
+    // PAGODA FLICKERS //
+    for (i=0; i< flickerParticles2.length; i++) {
+        drawFlickers2(flickerParticles2[i]);
+    }
+
+    // RADIAL //
+    for (i=0; i< radialParticles.length; i++) {
+        drawRadials(radialParticles[i]);
+    }
+
+    drawPassage();
 
     drawExtra();
 
@@ -104,13 +146,16 @@ function drawScene() {
             var shard = controller.Shards[j];
             pos = get2Dfrom3D(shard, camera3D);
             if (shard.Vine>0) {
-                drawVine(shard,pos);
+                setColor(shardCols[6]);
+                drawVine(shard.Vine,pos);
             }
             drawSprite(shard,pos);
         }
 
         drawArrows(controller);
     }
+
+    drawLensFlare();
 
     // HUD //
     cxa.globalAlpha = 1;
@@ -158,11 +203,11 @@ function drawSprite(obj,pos) {
     cxa.fill();
 }
 
-function drawVine(obj,pos) {
+function drawVine(height,pos) {
     var w = 2*units;
-    var h = obj.Vine*units;
+    var h = height*units;
 
-    setColor(shardCols[6]);
+
     //cxa.fillStyle = shardCols[6].toString();
     cxa.beginPath();
     cxa.moveTo(pos.x - w, pos.y);
@@ -350,9 +395,9 @@ function drawFlickers(p) {
     var vx = p.Vector.x*2;
     var vy = p.Vector.y*2;
     var h = 0;
-    if (AmbientPlayer.volume.value>5) {
+    if (Player[0].volume.value>5) {
 
-        h = (AmbientPlayer.volume.value-5) / 8;
+        h = (Player[0].volume.value-5) / 8;
 
 
         setColor(shardCols[4]);
@@ -365,63 +410,387 @@ function drawFlickers(p) {
         cxa.fill();
 
     }
+}
+
+function drawFlickers2(p) {
+
+    var origin = get2Dfrom3D(scenery[0],camera3D);
+
+    var x = origin.x + (p.Position.x*units);
+    var y = origin.y + (p.Position.y*units);
+    var h = 0;
+    if (Player[5].volume.value>5) {
+
+        h = (Player[5].volume.value-5) / 12;
+
+
+        setColor(shardCols[4]);
+        cxa.fillRect(x - (h*units),y - (100*units), (h*2) * units, 200 * units);
+
+    }
+}
+
+function drawWind(p) {
+
+    var origin = get2Dfrom3D(backgrounds[0],camera3D);
+    var sprite = p.Sprite;
+
+    var x = origin.x + ((p.Position.x + 500) * units);
+    var y = origin.y + ((p.Position.y - 100) * units);
+
+    setColor(shardCols[4]);
+
+    cxa.beginPath();
+    cxa.moveTo(x + (sprite[0].x * units),y + (sprite[0].y * units) );
+    for (var j=0; j< sprite.length; j++) {
+        cxa.lineTo(x + (sprite[j].x * units), y + (sprite[j].y * units));
+    }
+    cxa.closePath();
+    cxa.fill();
+}
+
+function drawDust(p) {
+    var size = 4 * units;
+    var origin = get2Dfrom3D(backgrounds[0],camera3D);
+
+    var x = origin.x + (p.Position.x * units);
+    var y = origin.y + ((p.Position.y - 100) * units);
+
+    setColor(shardCols[4]);
+    cxa.fillRect(x - (size* 0.5), y - (size* 0.5), size, size );
 
 }
 
-function drawWorm(p) {
+function drawSun() {
 
-    //var origin = get2Dfrom3D(World3D,camera3D);
+    var origin = get2Dfrom3D(scenery[3],camera3D);
+    var x = origin.x;
+    var y = origin.y;
+    var r;
 
-    var h = 0;
-    var j, i;
-    if (AmbientPlayer.volume.value>5) {
-        h = (AmbientPlayer.volume.value-5) / 2;
+    setRGBA(200,180,160,1);
 
+
+    r = Math.random()*50;
+    cxa.beginPath();
+    cxa.arc(x,y,((Reverb.wet.value*2500) + r)*units,0,2*Math.PI);
+    cxa.closePath();
+    cxa.fill();
+
+    setColor(shardCols[4]);
+
+
+    r = Math.random()*10;
+    cxa.beginPath();
+    cxa.arc(x,y,(180 + r)*units,0,2*Math.PI);
+    cxa.closePath();
+    cxa.fill();
+
+}
+
+function drawRadials(p) {
+
+    var origin = get2Dfrom3D(scenery[3],camera3D);
+    var x = origin.x + (p.Position.x*units);
+    var y = origin.y + (p.Position.y*units);
+    var vx = p.Vector.x;
+    var vy = p.Vector.y;
+    var r =  1 + (( Player[7].volume.value + 20 ) / 11.25);
+
+    setRGBA(180,80,90,1);
+    cxa.beginPath();
+    cxa.moveTo(x - ((vy*50)*units), y + ((vx*50)*units));
+    cxa.lineTo(x + ((vx*r)*units), y + ((vy*r)*units));
+    cxa.lineTo(x + ((vy*50)*units), y - ((vx*50)*units));
+    cxa.lineTo(x + ((vx*1)*units), y + ((vy*1)*units));
+    cxa.closePath();
+    cxa.fill();
+
+}
+
+function drawLensFlare() {
+    var origin = get2Dfrom3D(scenery[3],camera3D);
+
+    var x = halfX - ((origin.x - halfX)*0.7);
+    var y = halfY - (60*units) - ((origin.y - halfY)*0.7);
+
+    setRGBA(210,220,255,1);
+    cxa.globalAlpha = 0.5;
+    cxa.beginPath();
+    cxa.moveTo(x - (20*units), y - (5*units));
+    cxa.lineTo(x + (20*units), y - (5*units));
+    cxa.lineTo(x, y + (31*units));
+    cxa.closePath();
+    cxa.fill();
+
+    x = halfX - ((origin.x - halfX)*0.9);
+    y = halfY - (60*units) - ((origin.y - halfY)*0.9);
+
+    setRGBA(255,220,230,1);
+    cxa.beginPath();
+    cxa.moveTo(x - (40*units), y - (10*units));
+    cxa.lineTo(x + (40*units), y - (10*units));
+    cxa.lineTo(x, y + (55*units));
+    cxa.closePath();
+    cxa.fill();
+
+    cxa.globalAlpha = 1;
+
+}
+
+function drawPassage() {
+    if (passageAlpha.A>0) {
+        var i;
         setColor(shardCols[4]);
-        cxa.globalAlpha = 1;
+        cxa.globalAlpha = passageAlpha.A/100;
+        for (i=0; i< passageParticles.length; i++) {
+            var p =passageParticles[i];
 
-        for (i=0; i< p.Particles.length; i++) {
+            var s = p.Z;
+            var su = s * units;
+            var x = halfX + (p.Position.x * units);
+            var y = halfY + (p.Position.y * units);
 
-
-            var point = p.History[p.History.length-1][i];
-            var x = halfX + (point.x*units);
-            var y = halfY + (point.y*units);
-
-            var pointList = [];
-            var step = 10;
-            var length = 100;
-
-            if (p.History.length===length) {
+            cxa.fillRect(x - (1*su), y - ( (1 + ((Player[9].volume.value + 20) * 2))*su), 2*su,( (2 + ((Player[9].volume.value + 20) * 4))*su));
 
 
-                for (j=(p.History.length-1); j>=0; j-=step) {
-                    point = p.History[j][i];
-
-                    x = halfX + (point.x*units);
-                    y = halfY + (point.y*units);
-                    var slot = (length/step) - ((j+1)/step);
-                    var total = (((length/step)*2) - 1);
-                    var hmod = 1 - ((1/(length/step))*slot);
-                    pointList[slot] = new Point( x, y - ((h*hmod)*units) );
-                    pointList[total - slot] = new Point( x, y + ((h*hmod)*units) );
-                }
-
-                cxa.beginPath();
-                cxa.moveTo(pointList[0].x,pointList[0].y);
-                for (j=1; j<pointList.length; j++) {
-                    cxa.lineTo(pointList[j].x,pointList[j].y);
-                }
-                cxa.closePath();
-                cxa.fill();
-            }
 
         }
+        cxa.globalAlpha = 1;
     }
+}
+
+function drawPagoda() {
+
+    var x, y, origin;
+    var xs = 1;
+    /*if (scenery[0].XScale===true) {
+        xs = rotateScale.x;
+    }*/
+
+    origin = get2Dfrom3D(scenery[2],camera3D);
+    x = origin.x;
+    y = origin.y;
+
+
+    var yh = Math.random()*5;
+
+    setColor(shardCols[5]);
+    cxa.beginPath();
+    cxa.moveTo( x - ((140*xs)*units), y - ((120+yh)*units) ); // tl
+    cxa.lineTo( x, y - ((80+yh)*units) );
+    cxa.lineTo( x + ((140*xs)*units), y - ((120+yh)*units) );
+    cxa.lineTo( x + ((140*xs)*units), y - ((80-yh)*units) );
+    cxa.lineTo( x, y - ((40-yh)*units) );
+    cxa.lineTo( x - ((140*xs)*units), y - ((80-yh)*units) );
+    cxa.closePath();
+    cxa.fill();
+
+
+    setColor(landCols[2]);
+    pagodaHeader(x,y - (5*units),180,60,xs);
+
+
+
+    setColor(shardCols[5]);
+    drawVine(100,new Point(x - (60*units),y - (5*units)));
+    drawVine(140,new Point(x - (56*units),y - (5*units)));
+    drawVine(70,new Point(x + (80*units),y - (5*units)));
+    drawVine(90,new Point(x + (90*units),y - (5*units)));
+    drawVine(180,new Point(x - (132*units),y - (5*units)));
+    drawVine(120,new Point(x - (145*units),y - (5*units)));
+
+    cxa.lineWidth = 2* units;
+    var ps1 = new Point(x + (60*units),y - (5*units));
+    var ps2 = new Point(x + (155*units),y - (5*units));
+
+    cxa.beginPath();
+    cxa.moveTo(ps1.x, ps1.y);
+    cxa.bezierCurveTo(ps1.x, ps1.y+(100*units), ps2.x, ps1.y+(100*units), ps2.x, ps2.y);
+    cxa.stroke();
+    cxa.lineWidth = 1;
+
+
+
+
+
+
+
+
+
+
+    // MID //
+    origin = get2Dfrom3D(scenery[1],camera3D);
+    x = origin.x;
+    y = origin.y;
+
+    setColor(landCols[2]);
+    pagodaHeader(x,y - (60*units),100,32,xs);
+
+
+    cxa.beginPath();
+    cxa.moveTo( x - ((60*xs)*units), y - (80*units) ); // tl
+    cxa.lineTo( x + ((60*xs)*units), y - (80*units) );
+    cxa.lineTo( x , y - (100*units) );
+    cxa.closePath();
+    cxa.fill();
+
+    cxa.beginPath();
+    cxa.moveTo( x - ((140*xs)*units), y ); // tl
+    cxa.lineTo( x - ((140*xs)*units), y + (120*units) );
+    cxa.lineTo( x - ((110*xs)*units), y + (130*units) );
+    cxa.lineTo( x - ((100*xs)*units), y + (140*units) );
+    cxa.lineTo( x - ((100*xs)*units), y );
+    cxa.closePath();
+    cxa.fill();
+
+    cxa.beginPath();
+    cxa.moveTo( x + ((140*xs)*units), y ); // tl
+    cxa.lineTo( x + ((140*xs)*units), y + (160*units) );
+    cxa.lineTo( x + ((130*xs)*units), y + (170*units) );
+    cxa.lineTo( x + ((107*xs)*units), y + (175*units) );
+    cxa.lineTo( x + ((100*xs)*units), y + (180*units) );
+    cxa.lineTo( x + ((100*xs)*units), y );
+    cxa.closePath();
+    cxa.fill();
+
+    setColor(shardCols[3]);
+    cxa.beginPath();
+    cxa.moveTo( x - ((140*xs)*units), y - (5*units) ); // tl
+    cxa.lineTo( x - ((140*xs)*units), y + (15*units) );
+    cxa.lineTo( x - ((120*xs)*units), y + (10*units) );
+    cxa.lineTo( x - ((107*xs)*units), y + (30*units) );
+    cxa.lineTo( x - ((100*xs)*units), y + (20*units) );
+    cxa.lineTo( x - ((100*xs)*units), y - (5*units) );
+
+    cxa.moveTo( x + ((140*xs)*units), y - (5*units) ); // tl
+    cxa.lineTo( x + ((140*xs)*units), y + (40*units) );
+    cxa.lineTo( x + ((130*xs)*units), y + (55*units) );
+    cxa.lineTo( x + ((107*xs)*units), y + (50*units) );
+    cxa.lineTo( x + ((100*xs)*units), y + (60*units) );
+    cxa.lineTo( x + ((100*xs)*units), y - (5*units) );
+    cxa.closePath();
+    cxa.fill();
+
+    // green //
+    //setColor(shardCols[6]);
+    setRGBA(105,130,115,1);
+    cxa.beginPath();
+    cxa.moveTo( x - ((20*xs)*units), y - (5*units) ); // tl
+    cxa.lineTo( x + ((20*xs)*units), y + (10*units) );
+    cxa.lineTo( x + ((40*xs)*units), y + (6*units) );
+    cxa.lineTo( x + ((70*xs)*units), y + (17*units) );
+    cxa.lineTo( x + ((75*xs)*units), y + (19*units) );
+    cxa.lineTo( x + ((100*xs)*units), y + (13*units) );
+
+    cxa.lineTo( x + ((130*xs)*units), y - (5*units) );
+    cxa.closePath();
+    cxa.fill();
+
+
+    setRGBA(120,140,130,1);
+    cxa.beginPath();
+    cxa.moveTo( x + ((90*xs)*units), y - (5*units) ); // tl
+    cxa.lineTo( x + ((60*xs)*units), y + (10*units) );
+    cxa.lineTo( x + ((50*xs)*units), y + (40*units) );
+    cxa.lineTo( x + ((65*xs)*units), y + (14*units) );
+
+    cxa.lineTo( x + ((90*xs)*units), y - (3*units) );
+
+    cxa.lineTo( x + ((80*xs)*units), y + (15*units) );
+    cxa.lineTo( x + ((75*xs)*units), y + (55*units) );
+    cxa.lineTo( x + ((85*xs)*units), y + (20*units) );
+    cxa.closePath();
+    cxa.fill();
+
+    setColor(shardCols[5]);
+    cxa.fillRect(x-(145*units),y-(40*units),290*units,44*units);
+
+    // FRONT //
+    origin = get2Dfrom3D(scenery[0],camera3D);
+    x = origin.x;
+    y = origin.y;
+
+
+
+    drawVine(50,new Point(x - (90*units),y - (5*units)));
+    drawVine(60,new Point(x - (65*units),y - (5*units)));
+    drawVine(120,new Point(x + (85*units),y - (5*units)));
+    drawVine(50,new Point(x + (160*units),y - (5*units)));
+    drawVine(170,new Point(x + (130*units),y - (5*units)));
+
+    cxa.lineWidth = 2* units;
+    ps1 = new Point(x + (130*units),y - (5*units));
+    ps2 = new Point(x + (165*units),y - (5*units));
+
+    cxa.beginPath();
+    cxa.moveTo(ps1.x, ps1.y);
+    cxa.bezierCurveTo(ps1.x, ps1.y+(80*units), ps2.x, ps1.y+(80*units), ps2.x, ps2.y);
+    cxa.stroke();
+    cxa.lineWidth = 1;
+
+    //setColor(landCols[1]);
+    pagodaHeader(x,y,200,60,xs);
+
+    cxa.beginPath();
+    cxa.moveTo( x - ((60*xs)*units), y - (45*units) ); // tl
+    cxa.lineTo( x + ((60*xs)*units), y - (45*units) );
+    cxa.lineTo( x , y - (65*units) );
+    cxa.closePath();
+    cxa.fill();
+
+    cxa.beginPath();
+    cxa.moveTo( x - ((140*xs)*units), y - (5*units) ); // tl
+    cxa.lineTo( x - ((130*xs)*units), y + (8*units) );
+    cxa.lineTo( x - ((120*xs)*units), y + (3*units) );
+    cxa.lineTo( x - ((107*xs)*units), y + (5*units) );
+    cxa.lineTo( x - ((105*xs)*units), y + (3*units) );
+    cxa.lineTo( x - ((100*xs)*units), y - (5*units) );
+
+    cxa.moveTo( x + ((140*xs)*units), y - (5*units) ); // tl
+    cxa.lineTo( x + ((140*xs)*units), y - (5*units) );
+    cxa.lineTo( x + ((130*xs)*units), y + (8*units) );
+    cxa.lineTo( x + ((120*xs)*units), y + (2*units) );
+    cxa.lineTo( x + ((110*xs)*units), y + (5*units) );
+    cxa.lineTo( x + ((100*xs)*units), y - (5*units) );
+    cxa.closePath();
+    cxa.fill();
+
+    setColor(shardCols[3]);
+    cxa.beginPath();
+    cxa.moveTo( x - ((50*xs)*units), y - (30*units) ); // tl
+    cxa.lineTo( x , y - (20*units) );
+    cxa.lineTo( x + ((50*xs)*units), y - (30*units) );
+    //cxa.lineTo( x , y - (40*units) );
+    cxa.closePath();
+    cxa.fill();
+
+
+
+}
+
+
+
+function pagodaHeader(x,y,w,h,xs) {
+
+    var yh = Math.random()*5;
+    yh = 0;
+
+    cxa.beginPath();
+    cxa.moveTo( x - (((w*1.05)*xs)*units), y - (((h*1.15)+yh)*units) ); // tl
+    cxa.lineTo( x - (((w*0.9)*xs)*units), y - (((h*0.82)+yh)*units) );
+    cxa.lineTo( x + (((w*0.9)*xs)*units), y - (((h*0.82)+yh)*units) );
+    cxa.lineTo( x + (((w*1.05)*xs)*units), y - (((h*1.15)+yh)*units) ); // tr
+    cxa.lineTo( x + (((w*0.95)*xs)*units), y + (yh*units) );
+    cxa.lineTo( x - (((w*0.95)*xs)*units), y + (yh*units) );
+    cxa.closePath();
+    cxa.fill();
+
 }
 
 function drawWorm2(w) {
     var j, k;
-    if (TunePlayer2.volume.value>5) {
+    if (Player[3].volume.value>5) {
         setColor(shardCols[4]);
         cxa.globalAlpha = 1;
         if (w.Sprites.length) {
@@ -452,51 +821,30 @@ function drawTriangle() {
         var y = halfY + (20*units);
         var w = ((ArpOsc.volume.value + 20) * (2.5 + (Math.random()*1.5))) * units;
 
-        /*// OUTSIDE //
-        cxa.beginPath();
-        cxa.moveTo(x, y + r);
-        cxa.lineTo(x - (r * v.x), y - (r * v.y));
-        cxa.lineTo(x + (r * v.x), y - (r * v.y));
-        cxa.lineTo(x, y + r);
+        if (scene < 4) {
 
-        // INSIDE //
-        cxa.lineTo(x, y + (r - w));
-        cxa.lineTo(x + ((r - w) * v.x), y - ((r - w) * v.y));
-        cxa.lineTo(x - ((r - w) * v.x), y - ((r - w) * v.y));
-        cxa.lineTo(x, y + (r - w));*/
-
-        // OUTSIDE //
-        cxa.beginPath();
-        cxa.moveTo(x - (r * v.x), y + (r * v.y));
-        cxa.lineTo(x, y - r);
-        cxa.lineTo(x + (r * v.x), y + (r * v.y));
-
-
-        // INSIDE //
-        cxa.lineTo(x + ((r - w) * v.x), y + ((r - w) * v.y));
-        cxa.lineTo(x, y - (r - w));
-        cxa.lineTo(x - ((r - w) * v.x), y + ((r - w) * v.y));
-
-
-        cxa.closePath();
-        cxa.fill();
-
-
-        /*setColor(shardCols[4]);
-        w *= 0.2;
-        var rv;
-        for (var i=0; i<5; i++) {
+            // OUTSIDE //
             cxa.beginPath();
-            rv = vectorFromAngle(randomAngle());
-            cxa.moveTo(x + (w * rv.x), y + (w * rv.y));
-            rv = vectorFromAngle(randomAngle());
-            cxa.lineTo(x + (w * rv.x), y + (w * rv.y));
-            rv = vectorFromAngle(randomAngle());
-            cxa.lineTo(x + (w * rv.x), y + (w * rv.y));
+            cxa.moveTo(x - (r * v.x), y + (r * v.y));
+            cxa.lineTo(x, y - r);
+            cxa.lineTo(x + (r * v.x), y + (r * v.y));
+
+
+            // INSIDE //
+            cxa.lineTo(x + ((r - w) * v.x), y + ((r - w) * v.y));
+            cxa.lineTo(x, y - (r - w));
+            cxa.lineTo(x - ((r - w) * v.x), y + ((r - w) * v.y));
+
+
             cxa.closePath();
             cxa.fill();
-        }*/
+        } else {
+            setColor(shardCols[4]);
+            /*cxa.fillRect(x - ((r)* v.x), y - ((r)* v.x),w * v.x, r * v.x * 2);
+            cxa.fillRect(x + ((r - w)* v.x), y - ((r)* v.x),w * v.x, r * v.x * 2);*/
+            cxa.fillRect(x - (w* v.x), 0,w * v.x * 2, fullY);
 
+        }
 
 
 
@@ -545,6 +893,14 @@ function setRGBA(r,g,b,a) {
     var green = Math.round(g + masterCol.G);
     var blue = Math.round(b + masterCol.B);
     var alpha = a + masterCol.A;
+
+    // high & low pass color filters //
+    var av = ((red + green + blue) / 3);
+    var hp = av/255;
+    var lp = 1 - (av/255);
+    red += Math.round((highPass.R*hp) + (lowPass.R*lp));
+    green += Math.round((highPass.G*hp) + (lowPass.G*lp));
+    blue += Math.round((highPass.B*hp) + (lowPass.B*lp));
 
     buildColour(red,green,blue,alpha);
 }

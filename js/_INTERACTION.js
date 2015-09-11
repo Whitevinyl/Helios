@@ -72,8 +72,9 @@ function mouseMove(event) {
         y = event.pageY;
     }
 
-    mouseX = x;
-    mouseY = y;
+    const ratio = getPixelRatio();
+    mouseX = x / ratio;
+    mouseY = y / ratio;
 
 
     // 3D DRAG //
@@ -122,8 +123,9 @@ function clickOrTouch(event) {
         y = event.pageY;
     }
 
-    mouseX = x;
-    mouseY = y;
+    const ratio = getPixelRatio();
+    mouseX = x / ratio;
+    mouseY = y / ratio;
 
     if (mouseIsDown==false) {
         mousePress(event);
@@ -236,4 +238,13 @@ function getPosition(controller,axis) {
     var slider = controller.Slider;
     var origin = slider.origin[""+axis];
     return linPosition(origin,origin + slider.range[""+axis],slider.minVal[""+axis],slider.maxVal[""+axis],value);
+}
+
+function setValue(controller,axis,value) {
+    controller.Slider.value[""+axis] = value;
+}
+
+function setPosition(controller,axis) {
+    var objPos = controller.ThreeDest;
+    objPos[""+axis] = getPosition(controller,axis);
 }

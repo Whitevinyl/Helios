@@ -28,6 +28,12 @@ function setup3D() {
         var background = BackgroundList[i];
         backgrounds.push ( createBackground(background) );
     }
+
+    for (i=0; i<SceneryList.length; i++) {
+        var scn = SceneryList[i];
+        scenery.push ( createScenery(scn) );
+    }
+
     for (i=0; i<ControllerList.length; i++) {
         var controller = ControllerList[i];
         controllers.push ( createController(controller) );

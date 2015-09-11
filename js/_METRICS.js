@@ -11,18 +11,23 @@
 
 function metrics() {
 
-    var canvasDestW = window.innerWidth;
-    var canvasDestH = window.innerHeight;
-    canvas.width  = canvasDestW;
-    canvas.height = canvasDestH;
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    const ratio = getPixelRatio();
 
-    console.log(canvasDestW);
+    canvas.width  = width * ratio;
+    canvas.height = height * ratio;
+
+    cxa.setTransform(ratio, 0, 0, ratio, 0, 0);
+
+    console.log(width);
+    console.log(ratio);
 
     // UNIT SIZES //
-    halfX = Math.round(canvasDestW/2);
-    halfY = Math.round(canvasDestH/2);
-    fullX = canvasDestW;
-    fullY = canvasDestH;
+    halfX = Math.round((width * ratio)/2);
+    halfY = Math.round((height * ratio)/2);
+    fullX = width * ratio;
+    fullY = height * ratio;
 
     // DEVICE CHECK //
 
@@ -39,7 +44,7 @@ function metrics() {
 
     if (device=="mobile") {
 
-        u = canvasDestW*2.6;
+        u = (width * ratio) * 2.6;
         units = (u/1000);
 
         // TEXT SIZES //
@@ -56,7 +61,7 @@ function metrics() {
 
     } else {
 
-        u = canvasDestH*1.8;
+        u = (height * ratio) * 1.8;
         units = (u/800);
 
         // TEXT SIZES //
@@ -77,4 +82,17 @@ function metrics() {
 
     dx = halfX;
     dy = halfY;
+}
+
+
+function getPixelRatio() {
+    var ctx = cxa;
+    var dpr = window.devicePixelRatio || 1;
+    var bsr = ctx.webkitBackingStorePixelRatio ||
+        ctx.mozBackingStorePixelRatio ||
+        ctx.msBackingStorePixelRatio ||
+        ctx.oBackingStorePixelRatio ||
+        ctx.backingStorePixelRatio || 1;
+
+    return dpr / bsr;
 }
