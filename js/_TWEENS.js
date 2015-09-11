@@ -74,6 +74,23 @@ function delayTo(obj,value,to,t,d) {
     //tween.easing( TWEEN.Easing.Quintic.InOut );
 }
 
+function cancelTo(obj,value,to,t,d) {
+
+    var pos = { x: obj[""+value] };
+
+    cancelTween = new TWEEN.Tween(pos);
+    cancelTween.to( { x: to }, t*1000 );
+    cancelTween.delay(d*1000);
+    cancelTween.start();
+
+    cancelTween.onUpdate(function() {
+        obj[""+value] = this.x;
+    });
+
+    cancelTween.easing( TWEEN.Easing.Quadratic.InOut );
+    //tween.easing( TWEEN.Easing.Quintic.InOut );
+}
+
 function positionTo(pos,to,t,d,ease) {
 
     ease = ease || "quint";

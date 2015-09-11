@@ -17,8 +17,10 @@ function metrics() {
 
     canvas.width  = width * ratio;
     canvas.height = height * ratio;
+    canvas.style.width = width + "px";
+    canvas.style.height = height + "px";
 
-    cxa.setTransform(ratio, 0, 0, ratio, 0, 0);
+    //cxa.setTransform(ratio, 0, 0, ratio, 0, 0);
 
     console.log(width);
     console.log(ratio);
@@ -45,18 +47,21 @@ function metrics() {
     if (device=="mobile") {
 
         u = (width * ratio) * 2.6;
-        units = (u/1000);
+        units = (u/1200);
 
         // TEXT SIZES //
-        headerType = Math.round(u/20);
+        headerType = Math.round(u/25);
         midType = Math.round(u/80);
-        dataType = Math.round(u/120);
+        dataType = Math.round(u/100);
         bodyType = Math.round(u/100);
         subType = Math.round(u/90);
 
         if (camera3D) {
             camera3D.aspect = fullX / (fullX*1.2);
+            camera3D.aspect = halfX / halfY;
             camera3D.updateProjectionMatrix();
+            cameraDepth = 4 + (((height/width)-1)*5);
+            camera3D.position.z = cameraDepth;
         }
 
     } else {
@@ -67,14 +72,16 @@ function metrics() {
         // TEXT SIZES //
         headerType = Math.round(u/12);
         midType = Math.round(u/65);
-        dataType = Math.round(u/100);
-        bodyType = Math.round(u/100);
+        dataType = Math.round(u/82);
+        bodyType = Math.round(u/42);
         subType = Math.round(u/90);
 
 
         if (camera3D) {
             camera3D.aspect = halfX / halfY;
             camera3D.updateProjectionMatrix();
+            cameraDepth = 4;
+            camera3D.position.z = cameraDepth;
         }
     }
 
@@ -82,6 +89,17 @@ function metrics() {
 
     dx = halfX;
     dy = halfY;
+
+    cxa.font = "400 " + midType + "px Raleway";
+    var btnText = "info".toUpperCase();
+    infoWidth = cxa.measureText(btnText).width;
+
+    if (panelOpen) {
+        panelPos.y = 0;
+    } else {
+        panelPos.y = -fullY;
+        panelOpen = false;
+    }
 }
 
 

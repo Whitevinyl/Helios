@@ -20,29 +20,56 @@ function mousePress() {
         mouseIsDown = true;
         rolloverCheck();
 
-        downPoint.x = mouseX;
-        downPoint.y = mouseY;
-        downRotation.x = MasterObject.rotation.y;
-        downRotation.y = MasterObject.rotation.x;
+        if (!panelOpen) {
 
-        // FOR EACH CONTROLLER //
-        for (var i=0; i<controllers.length; i++) {
-            var controller = controllers[i];
+            downPoint.x = mouseX;
+            downPoint.y = mouseY;
+            downRotation.x = MasterObject.rotation.y;
+            downRotation.y = MasterObject.rotation.x;
 
-            if (controller.RollOver) {
+            // FOR EACH CONTROLLER //
+            for (var i=0; i<controllers.length; i++) {
+                var controller = controllers[i];
 
-                if (controller.Event) {
-                    controller.Event();
-                } else {
-                    controller.IsPressed = true;
-                    selectedController = controller;
-                    selectedControllerPos = clone3D(controller.ThreeObject.position);
-                    mouseDown3D = cursorTo3D(mouseX,mouseY,controller,camera3D);
+                if (controller.RollOver) {
+
+                    if (controller.Event) {
+                        controller.Event();
+                    } else {
+                        controller.IsPressed = true;
+                        selectedController = controller;
+                        selectedControllerPos = clone3D(controller.ThreeObject.position);
+                        mouseDown3D = cursorTo3D(mouseX,mouseY,controller,camera3D);
+                    }
+
+                    return;
                 }
-
-                return;
             }
+
         }
+
+
+        if (infoOver || orderOver) {
+            openInfo();
+        }
+
+        if (closeOver) {
+            closeInfo();
+        }
+
+        if (linkOver[0]) {
+            window.open("https://heliosmusic.bandcamp.com/","_blank");
+        }
+        if (linkOver[1]) {
+            window.open("https://itunes.apple.com/album/yume/id1021990602","_blank");
+        }
+        if (linkOver[2]) {
+            window.open("http://unseen-music.com/","_blank");
+        }
+        if (linkOver[3]) {
+            window.open("http://whitevinyldesign.com","_blank");
+        }
+
     }
 }
 
@@ -54,6 +81,9 @@ function mouseRelease() {
         var controller = controllers[i];
 
         controller.IsPressed = false;
+        if (touchTakeover) {
+            controller.RollOver = false;
+        }
 
     }
 }
@@ -73,8 +103,8 @@ function mouseMove(event) {
     }
 
     const ratio = getPixelRatio();
-    mouseX = x / ratio;
-    mouseY = y / ratio;
+    mouseX = x * ratio;
+    mouseY = y * ratio;
 
 
     // 3D DRAG //
@@ -91,12 +121,51 @@ function mouseMove(event) {
 
 function rolloverCheck() {
 
+    var pointer = false;
+
     if (scene>0) {
         for (var i=0; i<controllers.length; i++) {
             var controller = controllers[i];
             var pos = get2Dfrom3D(controller, camera3D);
             controller.RollOver = hitBox(pos.x - ((controller.Size.w*0.5)*units), pos.y - ((controller.Size.h*0.5)*units), controller.Size.w*units, controller.Size.h*units);
+            /*if (interactable && controller.RollOver && !panelOpen) {
+                pointer = true;
+            }*/
         }
+
+
+
+        infoOver = hitBox(20*units, fullY - (45 * units), (40*units), 35*units);
+        orderOver = hitBox(halfX - (100*units),halfY - (145*units) - (orderY*units), (200*units), 40*units);
+
+
+        closeOver = hitBox(halfX - (60*units), panelPos.y + halfY + (90*units), 120* units, 30*units);
+        linkOver[0] = hitBox(halfX - (240*units), panelPos.y + halfY - (45*units), 160*units, 30*units);
+        linkOver[1] = hitBox(halfX - (80*units), panelPos.y + halfY - (45*units), 160*units, 30*units);
+        linkOver[2] = hitBox(halfX + (80*units), panelPos.y + halfY - (45*units), 160*units, 30*units);
+
+
+
+
+        if (interactable) {
+
+            /*if (!panelOpen && (orderOver || infoOver) ) {
+                pointer = true;
+            }*/
+            if (panelOpen && (linkOver[0] || linkOver[1] || linkOver[2])) {
+                pointer = true;
+            }
+
+
+
+            if (pointer) {
+                canvas.style.cursor="pointer";
+            } else {
+                canvas.style.cursor="default";
+            }
+
+        }
+
     }
 
 
@@ -124,8 +193,9 @@ function clickOrTouch(event) {
     }
 
     const ratio = getPixelRatio();
-    mouseX = x / ratio;
-    mouseY = y / ratio;
+    mouseX = x * ratio;
+    mouseY = y * ratio;
+
 
     if (mouseIsDown==false) {
         mousePress(event);
@@ -247,4 +317,16 @@ function setValue(controller,axis,value) {
 function setPosition(controller,axis) {
     var objPos = controller.ThreeDest;
     objPos[""+axis] = getPosition(controller,axis);
+}
+
+function openInfo() {
+
+    panelOpen = true;
+    delayTo(panelPos,"y",0,0.4,0);
+}
+
+function closeInfo() {
+
+    panelOpen = false;
+    delayTo(panelPos,"y",-fullY,0.2,0);
 }

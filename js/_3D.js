@@ -40,7 +40,9 @@ function setup3D() {
         floatTo(controllers[i],Math.random()*2);
     }
 
-    camera3D.position.set(0,0,4);
+    camera3D.position.set(0,0,cameraDepth);
+
+    metrics();
 }
 
 //-------------------------------------------------------------------------------------------

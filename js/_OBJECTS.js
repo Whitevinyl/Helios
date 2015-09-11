@@ -90,7 +90,7 @@ function Shard( threeObject, size, sprite, color, xscale, vine ) {
     this.Vine = vine || 0;
 }
 
-function Controller( name, positions, threeObject, threeFloat, size, mode, slider, event, shards ) {
+function Controller( name, positions, threeObject, threeFloat, size, mode, slider, event, shards, text ) {
     this.Name = name || "No Name";
     this.Positions = positions || [new Point()];
     this.ThreeObject = threeObject || MasterObject;
@@ -107,6 +107,7 @@ function Controller( name, positions, threeObject, threeFloat, size, mode, slide
     this.Event = event;
     this.Shards = shards || [];
     this.IsPressed = false;
+    this.Text = text || "";
 }
 
 function Grain( buffer, output, volume ) {

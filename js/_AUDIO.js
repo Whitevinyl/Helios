@@ -114,6 +114,16 @@ function setupAudio() {
     loadTotal += 1;
     Player[9].volume.value = -50;
 
+    Player[10] = new Tone.Player();
+    Player[10].load("loops/trimmed/floaty01.mp3",function(player) {
+        player.loopEnd = 9;
+        player.loop = true;
+        loopsLoaded();
+    });
+    loadTotal += 1;
+    Player[10].volume.value = -50;
+
+
     Reverb = new Tone.JCReverb(0.9);
     Reverb.wet.value = 0;
 
@@ -165,6 +175,7 @@ function setupAudio() {
     Player[7].connect(Filter[0]);
     Player[8].connect(Filter[0]);
     Player[9].connect(Filter[0]);
+    Player[10].connect(Filter[0]);
 
     Osc[0].connect(Filter[0]);
     Osc[1].connect(Filter[0]);
@@ -232,7 +243,7 @@ function SynthSet(n) {
 function loopsLoaded() {
     loadedLoops += 1;
 
-    if (loadedLoops==10) {
+    if (loadedLoops==11) {
         getAllLoads();
     }
 }

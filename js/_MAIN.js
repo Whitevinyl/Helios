@@ -14,6 +14,7 @@ var loadReady = false;
 var introAlpha = new Alpha(100);
 
 
+
 // METRICS //
 var halfX = 0;
 var halfY = 0;
@@ -30,6 +31,7 @@ var subType = 0;
 var device = "desktop";
 var windowFocussed = true;
 var triVector = vectorFromAngle(degToRad(30));
+var cameraDepth = 4;
 
 
 // INTERACTION //
@@ -48,7 +50,18 @@ var selectedController = null;
 var selectedControllerPos = new Point3D();
 var mouseDown3D = new Point3D();
 var interactable = false;
-
+var infoAlpha = new Alpha(0);
+var infoOver = false;
+var infoWidth = 10;
+var orderOver = false;
+var cancelTween;
+var orderDest = 500;
+var orderY = 500;
+var orderFill = 0;
+var panelOpen = false;
+var panelPos = new Point(0,-5000);
+var closeOver = false;
+var linkOver = [];
 
 // COLOR //
 var landCols = [];
@@ -56,6 +69,7 @@ var landColsLight = [];
 var shardCols = [new RGBA(255,255,255,1), new RGBA(255,255,255,1), new RGBA(255,255,255,1), new RGBA(255,255,255,1), new RGBA(255,255,255,1), new RGBA(255,255,255,1), new RGBA(255,255,255,1)];
 var shardColsDark = [];
 var shardColsLight = [];
+var linkCol = new RGBA(30,35,40,1);
 
 var masterCol = new RGBA(-255,-255,-255,0);
 var highPass = new RGBA(0,0,0,0);
@@ -89,6 +103,7 @@ var masterRotate = new Point3D();
 var drumLevel = 1;
 
 var passageAlpha = new Alpha(0);
+var floatSpeed = new Vector(0,1);
 
 //-------------------------------------------------------------------------------------------
 //  INITIALISE
@@ -114,8 +129,11 @@ function loadPalette(pal,paletteURL) {
                 }
                 break;
             case "shardDark":
-                shardColsDark = palette;
+                //shardColsDark = palette;
                 shardCols = palette;
+                for (i=0; i<shardCols.length; i++) {
+                    shardColsDark[i] = shardCols[i].clone();
+                }
                 break;
         }
         getAllLoads();
@@ -331,6 +349,8 @@ function update() {
 
     scenery[3].ThreeObject.position.y += easeTo(scenery[3].ThreeObject.position.y, sunDest, 20, 100);
 
+    orderY += easeTo(orderY, orderDest, 10, 100);
+
     masterRotate.y += degToRad(0.5);
 
     scaleRotate();
@@ -436,7 +456,7 @@ function updatePassage() {
         for (var i=0; i<passageParticles.length; i++) {
             var p = passageParticles[i];
 
-            p.Position.y += (1 + ((Player[9].volume.value + 20) * 0.3) ) * p.Z;
+            p.Position.y += (floatSpeed.y + ((Player[9].volume.value + 20) * 0.3) ) * p.Z;
 
             if (p.Position.y > (fullY/units)) {
                 p.Position.y = - (fullY/units);

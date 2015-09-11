@@ -35,10 +35,10 @@ function drawIntro() {
 
     cxa.fillStyle = "#fff";
     cxa.strokeStyle = "#fff";
+    cxa.textAlign = "center";
     if (loadReady) {
 
         cxa.font = "100 " + headerType + "px Raleway";
-        cxa.textAlign = "center";
         cxa.fillText("HELIOS | YUME".toUpperCase(),halfX, halfY - (10*units));
 
         var s = 1 + (Math.random()*0.2);
@@ -54,21 +54,22 @@ function drawIntro() {
 
     } else {
         cxa.font = "400 " + midType + "px Raleway";
-        cxa.textAlign = "center";
         cxa.fillText("Loading Sounds".toUpperCase(),halfX, halfY - (4*units));
+
         cxa.fillRect(halfX - (6*units), halfY + (4*units), 12*units, 2*units );
 
         cxa.beginPath();
         cxa.moveTo(halfX - (60*units),halfY + (20*units));
         cxa.lineTo(halfX + (60*units),halfY + (20*units));
-        cxa.lineTo(halfX + (60*units),halfY + (32*units));
+        cxa.moveTo(halfX + (60*units),halfY + (32*units));
         cxa.lineTo(halfX - (60*units),halfY + (32*units));
-        cxa.closePath();
         cxa.stroke();
 
         cxa.fillRect(halfX - (60*units), halfY + (20*units), ((120/loadTotal)*loadedLoops)*units, 12*units );
 
     }
+    cxa.font = "400 " + dataType + "px Raleway";
+    cxa.fillText("Chrome Recommended",halfX, halfY + (170*units));
 }
 
 
@@ -166,12 +167,121 @@ function drawScene() {
     cxa.fillText("Helios | Yume".toUpperCase(),halfX, fullY - (30*units));
     cxa.fillRect(halfX - (6*units), fullY - (21*units), 12*units, 2*units );
 
+
+    // order button //
+    if (easeRotate == true) {
+
+
+        if (infoOver) {
+            if (infoAlpha.A < 100) {
+                infoAlpha.A += 2;
+            }
+        } else {
+            if (infoAlpha.A > 0) {
+                infoAlpha.A -= 2;
+            }
+        }
+        cxa.lineWidth = 2;
+
+        cxa.globalAlpha = 1 - (infoAlpha.A/100);
+
+        cxa.beginPath();
+
+        cxa.moveTo((20*units), fullY - (32*units));
+        cxa.lineTo((50*units), fullY - (38*units));
+
+        cxa.moveTo((20*units), fullY - (26*units));
+        cxa.lineTo((50*units), fullY - (32*units));
+
+        cxa.moveTo((20*units), fullY - (20*units));
+        cxa.lineTo((50*units), fullY - (26*units));
+
+        cxa.stroke();
+
+
+        setColor(shardCols[0]);
+        if (scene==7) {
+            setColor(landCols[1]);
+        }
+        cxa.globalAlpha = infoAlpha.A/100;
+        cxa.beginPath();
+
+        cxa.moveTo((20*units), fullY - (32*units));
+        cxa.lineTo((50*units), fullY - (38*units));
+
+        cxa.moveTo((20*units), fullY - (26*units));
+        cxa.lineTo((50*units), fullY - (32*units));
+
+        cxa.moveTo((20*units), fullY - (20*units));
+        cxa.lineTo((50*units), fullY - (26*units));
+
+        cxa.stroke();
+
+
+        setColor(shardCols[4]);
+        cxa.globalAlpha = 1;
+        cxa.lineWidth = 1;
+
+
+        if (scene == 7) {
+
+            //cxa.globalAlpha = orderAlpha.A/100;
+
+            /*if (orderOver) {
+                if (orderFill<30) {
+                    orderFill += 5;
+                }
+            } else {
+                if (orderFill>0) {
+                    orderFill -= 5;
+                }
+            }*/
+
+
+            var yo = orderY * units;
+
+
+            var btnText = "Order Yume by Helios".toUpperCase();
+            var bw = cxa.measureText(btnText).width;
+
+            if (orderOver) {
+                //setRGBA(80,70,50,1);
+                /*setColor(linkCol);
+                cxa.fillRect(halfX - (20*units) - (bw*0.5),halfY - (110*units) - yo, (40*units) + bw, -30*units);*/
+                cxa.lineWidth = 3;
+            } else {
+                cxa.lineWidth = 1;
+            }
+
+            setColor(shardCols[4]);
+            cxa.beginPath();
+            cxa.moveTo(halfX - (20*units) - (bw*0.5),halfY - (110*units) - yo);
+            cxa.lineTo(halfX + (20*units) + (bw*0.5),halfY - (110*units) - yo);
+            cxa.lineTo(halfX + (20*units) + (bw*0.5),halfY - (140*units) - yo);
+            cxa.lineTo(halfX - (20*units) - (bw*0.5),halfY - (140*units) - yo);
+            cxa.closePath();
+            cxa.stroke();
+
+            cxa.fillText(btnText,halfX, halfY - (120*units) - yo);
+
+
+        }
+    }
+
+
+
+
+
     // FLICKERS //
     for (i=0; i< flickerParticles.length; i++) {
         drawFlickers(flickerParticles[i]);
     }
 
 
+
+    // PANEL //
+
+    drawPanel();
 
 }
 
@@ -258,8 +368,12 @@ function drawArrows(obj) {
 
         var low = 0.1;
 
+        if (scene < 7) {
+            setColor(shardCols[4]);
+        } else {
+            setColor(landCols[1]);
+        }
 
-        setColor(shardCols[4]);
 
         if (down) {
 
@@ -355,10 +469,6 @@ function drawArrows(obj) {
             cxa.closePath();
             cxa.fill();
         }
-        /*if (mode==="shiftLeft" || mode==="shiftRight") {
-            cxa.globalAlpha = alpha;
-            cxa.fillRect(pos.x - units, pos.y - size, 2*units, size * 2);
-        }*/
 
     }
     cxa.globalAlpha = 1;
@@ -551,7 +661,7 @@ function drawPassage() {
             var x = halfX + (p.Position.x * units);
             var y = halfY + (p.Position.y * units);
 
-            cxa.fillRect(x - (1*su), y - ( (1 + ((Player[9].volume.value + 20) * 2))*su), 2*su,( (2 + ((Player[9].volume.value + 20) * 4))*su));
+            cxa.fillRect(x - (su), y - ( (1 + ((Player[9].volume.value + 20) * 2))*su), 2*su,( (2 + ((Player[9].volume.value + 20) * 4))*su));
 
 
 
@@ -935,8 +1045,94 @@ function buildColour(red,green,blue,alpha) {
     cxa.fillStyle = cxa.strokeStyle = "rgba("+red+","+green+","+blue+","+alpha+")";
 }
 
+//-------------------------------------------------------------------------------------------
+//  PANEL
+//-------------------------------------------------------------------------------------------
 
 
+function drawPanel() {
+
+    cxa.fillStyle = "#000";
+    cxa.fillRect(0,panelPos.y,fullX,fullY);
+
+
+
+
+    // CLOSE //
+
+    var cy = panelPos.y + halfY + (90*units);
+
+    if (closeOver) {
+        /*setColor(linkCol);
+        cxa.fillRect(halfX - (60*units),cy, (120*units), 30*units);*/
+        cxa.lineWidth = 3;
+    } else {
+        cxa.lineWidth = 1;
+    }
+
+    setColor(shardCols[4]);
+    cxa.beginPath();
+    cxa.moveTo(halfX - (60*units),cy);
+    cxa.lineTo(halfX + (60*units),cy);
+    cxa.lineTo(halfX + (60*units),cy + (30*units));
+    cxa.lineTo(halfX - (60*units),cy + (30*units));
+    cxa.closePath();
+    cxa.stroke();
+
+    cxa.lineWidth = 1;
+    cxa.beginPath();
+
+    // x //
+    cxa.moveTo(halfX - (5*units),cy + (10*units));
+    cxa.lineTo(halfX + (5*units),cy + (20*units));
+    cxa.moveTo(halfX + (5*units),cy + (10*units));
+    cxa.lineTo(halfX - (5*units),cy + (20*units));
+
+    cy = panelPos.y + halfY;
+
+    // divides //
+    cxa.moveTo(halfX - (80*units),cy - (42*units));
+    cxa.lineTo(halfX - (80*units),cy - (22*units));
+
+    cxa.moveTo(halfX + (80*units),cy - (42*units));
+    cxa.lineTo(halfX + (80*units),cy - (22*units));
+
+    cxa.stroke();
+
+
+
+    cxa.font = "400 italic " + dataType + "px PT Sans";
+    cxa.textAlign = "center";
+
+
+    cxa.fillText("All samples from the track Yume.",halfX, cy + (45*units));
+    cxa.fillText("Interactive by Whitevinyl.",halfX, cy + (60*units));
+
+
+    cxa.fillText("Order the album Yume here:",halfX, cy - (65*units));
+
+    cxa.font = "300 " + bodyType + "px Raleway";
+    cxa.fillText("Bandcamp".toUpperCase(),halfX - (160*units), cy - (25*units));
+    cxa.fillText("iTunes".toUpperCase(),halfX, cy - (25*units));
+    cxa.fillText("Unseen".toUpperCase(),halfX + (160*units), cy - (25*units));
+
+    var lw = 0;
+    if (linkOver[0]) {
+        lw = 20;
+    }
+    cxa.fillRect(halfX - (166*units) - ((lw*0.5)*units), cy - (10*units), (12*units) + (lw*units), 2*units );
+    lw = 0;
+    if (linkOver[1]) {
+        lw = 20;
+    }
+    cxa.fillRect(halfX - (6*units) - ((lw*0.5)*units), cy - (10*units), (12*units) + (lw*units), 2*units );
+    lw = 0;
+    if (linkOver[2]) {
+        lw = 20;
+    }
+    cxa.fillRect(halfX + (154*units) - ((lw*0.5)*units), cy - (10*units), (12*units) + (lw*units), 2*units );
+
+}
 
 //-------------------------------------------------------------------------------------------
 //  EFFECTS

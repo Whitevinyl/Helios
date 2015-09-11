@@ -288,7 +288,8 @@ function setupScene() {
         },
 
         { // 4
-            name: "SkipUp",
+            name: "EarthToSky",
+            text: "To the Sky",
             positions: [new Point3D(0, 1.25, 0.14),new Point3D(0, -14, 0.14)],
             size: new Size(25, 55),
             mode: "shiftUp",
@@ -306,7 +307,8 @@ function setupScene() {
         },
 
         { // 5
-            name: "SkipDown",
+            name: "SkyToEarth",
+            text: "To the Earth",
             positions: [new Point3D(0, 13, 0.15)],
             size: new Size(25, 55),
             mode: "shiftDown",
@@ -404,8 +406,9 @@ function setupScene() {
         },
 
         { // 8
-            name: "SkipSun",
-            positions: [new Point3D(2, 14, 0.15)],
+            name: "SkyToGarden",
+            text: "To the Peak",
+            positions: [new Point3D(1.4, 14, 0.15)],
             size: new Size(25, 55),
             mode: "shiftRight",
             event: SkipEvents[2],
@@ -423,7 +426,8 @@ function setupScene() {
 
         { // 9
             name: "GardenToSky",
-            positions: [new Point3D(38.5, 10, 0.15)],
+            text: "To the Sky",
+            positions: [new Point3D(38.6, 10, 0.15)],
             size: new Size(25, 55),
             mode: "shiftLeft",
             event: SkipEvents[0],
@@ -475,6 +479,7 @@ function setupScene() {
 
         { // 11
             name: "GardenToPagoda",
+            text: "To the Ruin",
             positions: [new Point3D(40, 11, 0.15)],
             size: new Size(25, 55),
             mode: "shiftUp",
@@ -493,6 +498,7 @@ function setupScene() {
 
         { // 12
             name: "PagodaToGarden",
+            text: "To the Peak",
             positions: [new Point3D(40, 21, 0.15)],
             size: new Size(25, 55),
             mode: "shiftDown",
@@ -511,6 +517,7 @@ function setupScene() {
 
         { // 13
             name: "PagodaToSun",
+            text: "To the Sun",
             positions: [new Point3D(40, 23, 0.15)],
             size: new Size(25, 55),
             mode: "shiftUp",
@@ -643,7 +650,8 @@ function setupScene() {
 
         { // 17
             name: "SunToPagoda",
-            positions: [new Point3D(2, 100, 0.15)],
+            text: "To the Ruin",
+            positions: [new Point3D(1.4, 100, 0.15)],
             size: new Size(25, 55),
             mode: "shiftRight",
             event: SkipEvents[3],
@@ -775,6 +783,7 @@ function setupScene() {
 
         { // 21
             name: "SunToPassage",
+            text: "To the Passage",
             positions: [new Point3D(0, 101, 0.15)],
             size: new Size(25, 55),
             mode: "shiftUp",
@@ -793,6 +802,7 @@ function setupScene() {
 
         { // 22
             name: "PassageToSun",
+            text: "To the Sun",
             positions: [new Point3D(0, 199, 0.15)],
             size: new Size(25, 55),
             mode: "shiftDown",
@@ -971,6 +981,7 @@ function setupScene() {
 
         { // 27
             name: "PassageToNight",
+            text: "To the Night",
             positions: [new Point3D(0, 201, 0.15)],
             size: new Size(25, 55),
             mode: "shiftUp",
@@ -989,6 +1000,7 @@ function setupScene() {
 
         { // 28
             name: "NightToPassage",
+            text: "To the Passage",
             positions: [new Point3D(0, 219, 0.15)],
             size: new Size(25, 55),
             mode: "shiftDown",
@@ -1000,6 +1012,49 @@ function setupScene() {
                     size: new Size(25, 55),
                     sprite: [new Point(0, -0.5), new Point(0.5, -0.15), new Point(0, 0.5), new Point(-0.5, -0.1)],
                     color: shardCols[1]
+                }
+
+            ]
+        },
+
+        { // 29
+            name: "FloatySample",
+            positions: [new Point3D(0, 220.5, 0.1)],
+            size: new Size(70, 80),
+            mode: "upDown",
+            slider: {
+                minVal: new Point(0,-60),
+                maxVal: new Point(0,-15),
+                range: new Point(0,0.5),
+                value: new Point(0,-15),
+                origins: [new Point(0,220)],
+                functions: [function(){},SliderFunctions[22]]
+            },
+            shards: [
+
+                {
+                    position: new Point3D(0, -0.1, -0.1),
+                    size: new Size(50, 110),
+                    sprite: [new Point(0, -0.5), new Point(0.5, 0), new Point(0, 0.5), new Point(-0.5, 0)],
+                    color: shardCols[2]
+                },
+                {
+                    position: new Point3D(0, 0, 0),
+                    size: new Size(60, 170),
+                    sprite: [new Point(0, -0.5), new Point(0, 0.5), new Point(-0.5, 0)],
+                    color: shardCols[1]
+                },
+                {
+                    position: new Point3D(0.1, 0.1, 0),
+                    size: new Size(25, 60),
+                    sprite: [new Point(0, -0.5), new Point(0.5, 0), new Point(0, 0.5)],
+                    color: shardCols[0]
+                },
+                {
+                    position: new Point3D(-0.1, -0.2, 0.1),
+                    size: new Size(25, 60),
+                    sprite: [new Point(0, -0.5), new Point(0, 0.5), new Point(-0.5, 0)],
+                    color: shardCols[0]
                 }
 
             ]
@@ -1123,11 +1178,24 @@ SliderFunctions = [
     },
     function(v,t) {
         controllers[7].Slider.value.x = v;
-        setController(controllers[7],false,"x"); // 19
+        setController(controllers[7],false,"x"); // 20
     },
     function(v,t) {
         controllers[7].Slider.value.y = v;
-        setController(controllers[7],false,"y"); // 19
+        setController(controllers[7],false,"y"); // 21
+    },
+    function(v,t) {
+        Tone.Master.volume.rampTo(v,t); // 22
+
+        if (v > -20) {
+            orderDest = (v+20) * 100;
+        }
+        else {
+            orderDest = 0;
+        }
+
+
+
     }
 ];
 
@@ -1185,7 +1253,7 @@ function createController(controller) {
         shards.push (new Shard(threeShard,shard.size, new Sprite(shard.sprite),shard.color,xscale,shard.vine));
     }
     // CREATE CONTROLLER //
-    return new Controller(controller.name,controller.positions,threeController,threeFloat,controller.size,controller.mode,controller.slider,controller.event,shards);
+    return new Controller(controller.name,controller.positions,threeController,threeFloat,controller.size,controller.mode,controller.slider,controller.event,shards,controller.text);
 }
 
 
@@ -1286,7 +1354,7 @@ function createRadials() {
 }
 
 function createPassage() {
-    for (var i=0; i<26; i++) {
+    for (var i=0; i<30; i++) {
         var p = new Passage(randomPoint(), new Vector(-(10 + (Math.random()*10)), -3 + (Math.random()*6)),0.2 + (Math.random()*1.8));
         passageParticles.push(p);
     }
