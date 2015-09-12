@@ -144,7 +144,7 @@ function rolloverCheck() {
         linkOver[1] = hitBox(halfX - (80*units), panelPos.y + halfY - (45*units), 160*units, 30*units);
         linkOver[2] = hitBox(halfX + (80*units), panelPos.y + halfY - (45*units), 160*units, 30*units);
 
-
+        linkOver[3] = hitBox(halfX, panelPos.y + halfY + (45*units), 60*units, 20*units);
 
 
         if (interactable) {
@@ -152,7 +152,7 @@ function rolloverCheck() {
             /*if (!panelOpen && (orderOver || infoOver) ) {
                 pointer = true;
             }*/
-            if (panelOpen && (linkOver[0] || linkOver[1] || linkOver[2])) {
+            if (panelOpen && (linkOver[0] || linkOver[1] || linkOver[2] || linkOver[3])) {
                 pointer = true;
             }
 

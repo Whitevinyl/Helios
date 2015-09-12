@@ -19,7 +19,7 @@ var loadTotal = 0;
 Tone.Transport.bpm.value = 80;
 
 function setupAudio() {
-    Tone.Master.volume.value = -15;
+    Tone.Master.volume.value = -18;
 
 
     Player[0] = new Tone.Player();

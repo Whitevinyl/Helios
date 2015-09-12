@@ -157,7 +157,7 @@ SkipEvents = [
         delayTo(rotateDest,"x",0,t,0); // vert
         delayTo(rotateDest,"y",0,t,0); // horiz
 
-        delayTo(synthGain, "x",1.6,t,0);
+        delayTo(synthGain, "x",1.2,t,0);
 
         positionTo(World3D,new Point3D(-40,-22,0),t,0,"quint");
 
@@ -170,7 +170,7 @@ SkipEvents = [
         automate(controllers[14],"x",0,t,0,false); // synth
         automate(controllers[14],"y",6000,t,0,false); // filter
         automate(controllers[10],"y",-60,t,0);
-        automate(controllers[15],"y",25,t,0);
+        automate(controllers[15],"y",22,t,0);
         automate(controllers[16],"y",-15,t,0); // drums
         if (scene > 4) {
             //Reverb.roomSize.rampTo(0.5,t);
@@ -259,7 +259,7 @@ SkipEvents = [
         automate(controllers[10],"y",-60,t,0);
         automate(controllers[15],"y",-20,t,0);
         automate(controllers[16],"y",-20,t,0);
-        automate(controllers[18],"y",25,t,0);
+        automate(controllers[18],"y",22,t,0);
         automate(controllers[19],"y",-20,t,0);
         automate(controllers[23],"y",-20,t,0);
         automate(controllers[24],"y",-20,t,0);
@@ -310,10 +310,10 @@ SkipEvents = [
         automate(controllers[18],"y",-20,t,0,false);
 
         automate(controllers[20],"y",0,t,0);
-        automate(controllers[23],"y",25,t,0);
+        automate(controllers[23],"y",22,t,0);
         automate(controllers[24],"y",-20,t,0);
-        automate(controllers[25],"y",25,t,0);
-        automate(controllers[29],"y",-15,t,0);
+        automate(controllers[25],"y",22,t,0);
+        automate(controllers[29],"y",-18,t,0);
         Player[10].volume.rampTo(-20,t);
         scene = 6;
     },

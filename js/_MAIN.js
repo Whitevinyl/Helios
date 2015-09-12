@@ -68,7 +68,7 @@ var landCols = [];
 var landColsLight = [];
 var shardCols = [new RGBA(255,255,255,1), new RGBA(255,255,255,1), new RGBA(255,255,255,1), new RGBA(255,255,255,1), new RGBA(255,255,255,1), new RGBA(255,255,255,1), new RGBA(255,255,255,1)];
 var shardColsDark = [];
-var shardColsLight = [];
+var shardColsLight = [new RGBA(255,255,255,1), new RGBA(255,255,255,1), new RGBA(255,255,255,1), new RGBA(255,255,255,1), new RGBA(255,255,255,1), new RGBA(255,255,255,1), new RGBA(255,255,255,1)];
 var linkCol = new RGBA(30,35,40,1);
 
 var masterCol = new RGBA(-255,-255,-255,0);
@@ -142,7 +142,7 @@ function loadPalette(pal,paletteURL) {
 
 function getAllLoads() {
     loadCount += 1;
-    if (loadCount===4) {
+    if (loadCount===3) {
         loadComplete();
     }
 }
@@ -211,7 +211,7 @@ function init() {
 
 
     loadPalette("land","img/land.gif");
-    loadPalette("shardLight","img/shardLight.gif");
+    //loadPalette("shardLight","img/shardLight.gif");
     loadPalette("shardDark","img/shardDark.gif");
 
     draw();
@@ -291,7 +291,7 @@ function startScene1() {
 
     setTimeout( function() {
         interactable = true;
-    },10200);
+    },9000);
 
 }
 

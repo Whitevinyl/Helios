@@ -85,7 +85,7 @@ function setupScene() {
 
         { // 0
             name: "Left",
-            positions: [new Point3D(-1, 20, -0.1), new Point3D(-1, 1, -0.1), new Point3D(-1, 14, -0.1)],
+            positions: [new Point3D(-1, 20, -0.1), new Point3D(-1, 0.75, -0.1), new Point3D(-1, 14, -0.1)],
             size: new Size(40, 80),
             mode: "leftRight",
             slider: {
@@ -118,7 +118,7 @@ function setupScene() {
 
         { // 1
             name: "Top",
-            positions: [new Point3D(0.37, 0.85, -0.2)],
+            positions: [new Point3D(0.37, 0.5, -0.2)],
             size: new Size(40, 80),
             mode: "upDown",
             slider: {
@@ -126,7 +126,7 @@ function setupScene() {
                 maxVal: new Point(0,10),
                 range: new Point(0,0.5),
                 value: new Point(0,0),
-                origins: [new Point(0,0.7)],
+                origins: [new Point(0,0.35)],
                 functions: [function(){},SliderFunctions[4]]
             },
             shards: [
@@ -290,7 +290,7 @@ function setupScene() {
         { // 4
             name: "EarthToSky",
             text: "To the Sky",
-            positions: [new Point3D(0, 1.25, 0.14),new Point3D(0, -14, 0.14)],
+            positions: [new Point3D(0, 1, 0.14),new Point3D(0, -14, 0.14)],
             size: new Size(25, 55),
             mode: "shiftUp",
             event: SkipEvents[0],
@@ -581,7 +581,7 @@ function setupScene() {
             mode: "upDown",
             slider: {
                 minVal: new Point(0,-20),
-                maxVal: new Point(0,25),
+                maxVal: new Point(0,22),
                 range: new Point(0,0.5),
                 value: new Point(0,-10),
                 origins: [new Point(0,21.6)],
@@ -615,7 +615,7 @@ function setupScene() {
             mode: "upDown",
             slider: {
                 minVal: new Point(0,-20),
-                maxVal: new Point(0,25),
+                maxVal: new Point(0,22),
                 range: new Point(0,0.5),
                 value: new Point(0,-10),
                 origins: [new Point(0,21.6)],
@@ -674,7 +674,7 @@ function setupScene() {
             mode: "upDown",
             slider: {
                 minVal: new Point(0,-20),
-                maxVal: new Point(0,25),
+                maxVal: new Point(0,22),
                 range: new Point(0,0.8),
                 value: new Point(0,-10),
                 origins: [new Point(0,99.6)],
@@ -714,7 +714,7 @@ function setupScene() {
             mode: "upDown",
             slider: {
                 minVal: new Point(0,-20),
-                maxVal: new Point(0,25),
+                maxVal: new Point(0,22),
                 range: new Point(0,0.8),
                 value: new Point(0,-10),
                 origins: [new Point(0,99.6),new Point(0,199.6)],
@@ -826,7 +826,7 @@ function setupScene() {
             mode: "upDown",
             slider: {
                 minVal: new Point(0,-20),
-                maxVal: new Point(0,25),
+                maxVal: new Point(0,22),
                 range: new Point(0,0.8),
                 value: new Point(0,-10),
                 origins: [new Point(0,200)],
@@ -866,7 +866,7 @@ function setupScene() {
             mode: "upDown",
             slider: {
                 minVal: new Point(0,-20),
-                maxVal: new Point(0,25),
+                maxVal: new Point(0,22),
                 range: new Point(0,0.8),
                 value: new Point(0,-10),
                 origins: [new Point(0,199.6)],
@@ -906,7 +906,7 @@ function setupScene() {
             mode: "upDown",
             slider: {
                 minVal: new Point(0,-20),
-                maxVal: new Point(0,25),
+                maxVal: new Point(0,22),
                 range: new Point(0,0.8),
                 value: new Point(0,-10),
                 origins: [new Point(0,199.6)],
@@ -1024,7 +1024,7 @@ function setupScene() {
             mode: "upDown",
             slider: {
                 minVal: new Point(0,-60),
-                maxVal: new Point(0,-15),
+                maxVal: new Point(0,-18),
                 range: new Point(0,0.5),
                 value: new Point(0,-15),
                 origins: [new Point(0,220)],
@@ -1156,7 +1156,7 @@ SliderFunctions = [
     function(v,t,g) {
         Player[6].volume.rampTo(v,t); // 14
         if (g) {
-            sunDest = 155 - (v+20);
+            sunDest = 152 - (v+20);
         }
 
     },

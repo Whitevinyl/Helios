@@ -468,6 +468,30 @@ function drawArrows(obj) {
             cxa.lineTo(pos.x, pos.y + (2*units));
             cxa.closePath();
             cxa.fill();
+
+            // TEXT //
+            cxa.font = "400 " + midType + "px Raleway";
+            cxa.textAlign = "center";
+            cxa.font = "400 italic " + midType + "px PT Sans";
+
+            setColor(shardCols[0]);
+            /*cxa.globalAlpha = alpha * 0.9;
+            var bw = cxa.measureText(obj.Text.toUpperCase()).width + (20*units);
+            cxa.fillRect(pos.x - (bw*0.5), pos.y - (45*units), bw, (20*units));
+
+            if (scene < 7) {
+                setColor(shardCols[4]);
+            } else {
+                setColor(landCols[1]);
+            }*/
+            cxa.globalAlpha = alpha;
+            cxa.fillText(obj.Text,pos.x, pos.y - (42*units));
+
+            cxa.fillRect(pos.x - (6*units), pos.y - (36*units), 12*units, 2*units );
+
+
+
+
         }
 
     }
@@ -1108,6 +1132,18 @@ function drawPanel() {
     cxa.fillText("All samples from the track Yume.",halfX, cy + (45*units));
     cxa.fillText("Interactive by Whitevinyl.",halfX, cy + (60*units));
 
+    var tw = cxa.measureText("Interactive by Whitevinyl.").width * 0.5;
+    var lw = cxa.measureText("Whitevinyl.").width;
+    if (linkOver[3]) {
+        cxa.lineWidth = 3;
+    } else {
+        cxa.lineWidth = 1;
+    }
+
+    cxa.beginPath();
+    cxa.moveTo(halfX + tw - units,cy + (66*units));
+    cxa.lineTo(halfX + tw - lw + units,cy + (66*units));
+    cxa.stroke();
 
     cxa.fillText("Order the album Yume here:",halfX, cy - (65*units));
 
@@ -1116,7 +1152,7 @@ function drawPanel() {
     cxa.fillText("iTunes".toUpperCase(),halfX, cy - (25*units));
     cxa.fillText("Unseen".toUpperCase(),halfX + (160*units), cy - (25*units));
 
-    var lw = 0;
+    lw = 0;
     if (linkOver[0]) {
         lw = 20;
     }
